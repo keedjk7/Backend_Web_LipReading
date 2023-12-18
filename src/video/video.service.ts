@@ -2,67 +2,85 @@ import { Injectable } from '@nestjs/common';
 import { CreateVideoDto } from './create-video.dto';
 import { Video } from './video.entity';
 
-import * as fs from "fs";
 import axios from 'axios';
-import busboy from "busboy";
-import { contains } from 'class-validator';
-import { env } from 'process';
+import { HistoryObj } from './history_obj.interface';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
-const CHUNK_SIZE_IN_BYTES = 1000000; // 1 mb
 require("dotenv").config();
 
 @Injectable()
 export class VideoService {
 
-  // upload
-  async create(createVideoDto : CreateVideoDto){
-    // console.log(createVideoDto);
-    // // const temp = {
-    // //   video_name : createVideoDto.video_name,
-    // //   video_path : createVideoDto.video_path
-    // // }
-    // console.log(typeof createVideoDto.video_name , typeof createVideoDto.video_path)
-    // const test = {video_name: 'test', video_path: 'test'}
+  constructor(
+    @InjectRepository(Video)
+    private historyRepository: Repository<Video>,
+  ) {}
 
-    // // const video = Video.create(createVideoDto);
-    // // const video = Video.create(test);
-    // const video = Video.create({video_name: createVideoDto.video_name,video_path: createVideoDto.video_path});
-    // await video.save();
-    
-    // return video;
-    createVideoDto.content = createVideoDto.content.replace(/^data:(.*?);base64,/, ""); // <--- make it any type
-    createVideoDto.content = createVideoDto.content.replace(/ /g, '+'); // <--- this is important
-  
-    const path = '../upload/';
 
-    fs.writeFile(`${path}${createVideoDto.video_name}`, createVideoDto.content, 'base64', function(err) {
+  // upload 
+  async create(history_obj:HistoryObj,createVideoDto:CreateVideoDto,user_id : number){
 
-      const video = Video.create({video_name: createVideoDto.video_name,video_path: path});
-      console.log(err);
-      
-      return 'error';
+    const history_video = Video.create({
+      user_create: user_id,
+      video_name: history_obj.video_name,
+      video_origin_path: history_obj.video_origin_path,
+      subtitle_path: history_obj.subtitle_path,
+      product_path: history_obj.product_path
     });
-      return 'save success';
+
+    await history_video.save();
+
+    // return with video_id for download
+    return { video_id : history_video.video_id,
+      status: '200 OK' };
+
   }
 
-    // download
-    async download(filename:string){
+  // download 
+  async download(video_id:number,user_id:number){
       try {
-        // const response = await axios.get(process.env.URL_ML);
-        // // console.log(process.env.URL_ML)
-        console.log('download_back')
-        const response = await axios.post(process.env.URL_ML_Download, {
-          filename : filename
-        });
-        // return {
-        //   content : response.data
-        // };
-        return response.data;
-      } catch (error) {
-        throw new Error(`Error calling API: ${error.message}`);
-      }
-    }
+      // const response = await axios.get(process.env.URL_ML);
+      console.log('id',video_id)
+      // search by id
+      const video = await Video.findOne({ where: { video_id: video_id } })
 
+  
+      console.log(video)
+      const response = await axios.post(process.env.URL_ML_Download, {
+        filename : video.video_name
+      });
+      // return {
+      //   content : response.data
+      // };
+      console.log('get_ml')
+
+      //check user_token and user create video same person
+      if(video.user_create == user_id){
+        // delete row in table if user_create = null (mean anonymous)
+        // console.log(video.user_create=='')
+        if (video.user_create == 0){
+           this.historyRepository.delete(video_id);
+      
+          // delete file 
+          await axios.post(process.env.URL_FILE_Delete, {
+            filename : video.video_name
+          });
+        }
+       
+
+        return response.data;   
+      }
+      // not same person
+      else{
+        return 'user_token and user create video not same person';
+      }
+
+      
+    } catch (error) {
+      throw new Error(`Error calling API: ${error.message}`);
+    }
+  }
 
   // // convert file
   // async convertFile(Content:string,filename:string){
@@ -78,23 +96,49 @@ export class VideoService {
   //   });
   //   return `${path}${filename}`
   // }
-  
+
+  //upload and process 
   async lipreading(createVideoDto : CreateVideoDto){
     try {
       // const response = await axios.get(process.env.URL_ML);
       // // console.log(process.env.URL_ML)
-      console.log(createVideoDto.content)
+      // console.log(createVideoDto.content)
       const response = await axios.post(process.env.URL_ML, {
         filename : createVideoDto.video_name,
         content : createVideoDto.content
       });
-      return response.data;
+      console.log(response.data);
+
+      // return '200 OK';
+
+      return response.data
     } catch (error) {
       throw new Error(`Error calling API: ${error.message}`);
     }
   }
 
+  // async getHistory(username: string): Promise<Video[]> {
+  //   const history = await this.historyRepository.find({ where: { user_create:username } });
+  //   // return history;
 
+  //   // get file from ml
+  //   // const response = await axios.post(process.env.URL_FILE_Get, {
+  //   //   filename : createVideoDto.video_name,
+  //   //   content : createVideoDto.content
+  //   // });
+  //   // const results = await Promise.all(history.map(async (item) => {
+  //   //   const response = await axios.post(process.env.URL_FILE_Get, { path: item.path });
+  //   //   return response.data;
+  //   // }));
+  //   return history;
+  // }
+  async findVideoByCreateId(id: number) {
+    return await Video.find({
+        where: {
+            user_create:id
+        }
+    });
+}
 
     
 }

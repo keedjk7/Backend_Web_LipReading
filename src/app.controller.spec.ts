@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { Express } from 'express';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -12,6 +13,8 @@ describe('AppController', () => {
     }).compile();
 
     appController = app.get<AppController>(AppController);
+    const fileupload = require("express-fileupload");
+    app.useLogger(fileupload);
   });
 
   describe('root', () => {

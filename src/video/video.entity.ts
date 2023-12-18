@@ -3,16 +3,19 @@ import { BaseEntity,Entity,PrimaryGeneratedColumn, Column, UpdateDateColumn } fr
 @Entity( {name : "video"} )
 export class Video extends BaseEntity{
   @PrimaryGeneratedColumn()
-  id: number;
+  video_id: number;
+
+  @Column()
+  user_create: number;
   
   @Column()
   video_name: string;
   
   @Column()
-  video_path: string;
+  video_origin_path: string;
   
   @Column()
-  subtitle: string;
+  subtitle_path: string;
   
   @Column()
   product_path: string;

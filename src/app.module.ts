@@ -9,9 +9,15 @@ import { AuthModule } from './auth/auth.module';
 import { VideoModule } from './video/video.module';
 import { Video } from './video/video.entity';
 import { TeamModule } from './team/team.module';
+import { Team } from './team/team.entity';
+import { PrivilegeModule } from './privilege/privilege.module';
+import { Privilege } from './privilege/privilege.entity';
+import { JwtModule } from '@nestjs/jwt';
+import { UserWorkspaceModule } from './user_workspace/user_workspace.module';
+import { PostModule } from './post/post.module';
 
 require("dotenv").config();
-const entities = [User,Video]
+const entities = [User,Video,Team,Privilege]
 
 @Module({
   imports: [
@@ -35,10 +41,17 @@ const entities = [User,Video]
       entities : entities,
       synchronize : true,
     }),
+    JwtModule.register({
+      secret: process.env.secret_jwt,
+      signOptions: {expiresIn: '6h'}
+    }),
     UsersModule,
     AuthModule,
     VideoModule,
     TeamModule,
+    PrivilegeModule,
+    UserWorkspaceModule,
+    PostModule,
   ],
   controllers: [AppController],
   providers: [AppService],

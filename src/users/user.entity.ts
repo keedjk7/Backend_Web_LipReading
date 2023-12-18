@@ -26,6 +26,9 @@ export class User extends BaseEntity{
     birthday : Date;
 
     @Column()
+    account_status : string
+
+    @Column()
     wallet_path : string;
 
     @Column()
