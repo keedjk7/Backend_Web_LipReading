@@ -14,4 +14,5 @@ export class CreatePostDto{
 
     file_content:string
 
+    // text
 }
