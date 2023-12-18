@@ -35,6 +35,7 @@ export class User extends BaseEntity{
     own_space : string;
     
     @UpdateDateColumn()
+    // @UpdateDateColumn({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createAt : Date;
 
     @UpdateDateColumn()

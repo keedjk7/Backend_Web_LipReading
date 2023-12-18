@@ -11,7 +11,7 @@ import { PostModule } from 'src/post/post.module';
     forwardRef(()=>PrivilegeModule), 
     forwardRef(()=>UsersModule), 
     forwardRef(()=>AuthModule),
-    forwardRef(()=>PostModule)
+    forwardRef(()=>PostModule),
   ],
   controllers: [TeamController],
   providers: [TeamService],

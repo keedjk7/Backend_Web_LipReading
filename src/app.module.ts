@@ -40,6 +40,15 @@ const entities = [User,Video,Team,Privilege]
       database : 'back_lip',
       entities : entities,
       synchronize : true,
+
+      // type : 'postgres',
+      // host : process.env.PostgreSQL_Host,
+      // port : parseInt(<string>process.env.PostgreSQL_Port),
+      // username : process.env.PostgreSQL_User,
+      // password : process.env.PostgreSQL_Password,
+      // database : process.env.PostgreSQL_Database,
+      // autoLoadEntities : true,
+      // synchronize : true,
     }),
     JwtModule.register({
       secret: process.env.secret_jwt,
