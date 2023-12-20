@@ -5,20 +5,26 @@ import { PrivilegeService } from 'src/privilege/privilege.service';
 import { AuthService } from 'src/auth/auth.service';
 import { EditPostDto } from './edit-post.dto';
 import * as fs from 'fs';
+import { VideoService } from 'src/video/video.service';
 
 @Controller('post')
 export class PostController {
-  constructor(private readonly postService: PostService,private readonly privilegeService: PrivilegeService,private readonly authService: AuthService) {}
+  constructor(private readonly postService: PostService,private readonly privilegeService: PrivilegeService,private readonly authService: AuthService,
+    private readonly videoService: VideoService) {}
 
   @Post('create')
   async createPost(@Body() createPostDto:CreatePostDto){
+
+    console.log(createPostDto)
+
+    const user_id = await this.authService.getUserByToken(createPostDto.access_token);
     
     // create new post
     const post_info = await this.postService.createPost(createPostDto);
 
     // add privilege post
     const postPrivilege = {
-      user_id : createPostDto.user_id,
+      user_id : user_id,
       team_id :createPostDto.team_id,
       post_id : post_info.post_id,
       role : 'PostOwner',
@@ -30,26 +36,26 @@ export class PostController {
     }
   }
 
-  @Post('edit')
-  async editPost(@Body() edit_post_info:EditPostDto){
-    // get user_id from token
-    const user_id = await this.authService.getUserByToken(edit_post_info.access_token);
-    // find user Role by team_id & user_id
-    const user_privilege = await this.privilegeService.findPrivilegeByUserAndTeam(user_id,edit_post_info.team_id)
-    // console.log(user_privilege)
-    // check privilege user
-    const permission = await this.privilegeService.privilege_permission(user_privilege.role,'None','edit_post')
+  // @Post('edit')
+  // async editPost(@Body() edit_post_info:EditPostDto){
+  //   // get user_id from token
+  //   const user_id = await this.authService.getUserByToken(edit_post_info.access_token);
+  //   // find user Role by team_id & user_id
+  //   const user_privilege = await this.privilegeService.findPrivilegeByUserAndTeam(user_id,edit_post_info.team_id)
+  //   // console.log(user_privilege)
+  //   // check privilege user
+  //   const permission = await this.privilegeService.privilege_permission(user_privilege.role,'None','edit_post')
 
-    if (permission == false){
-      return{
-        'status' : '403 Forbidden'
-      }
-    }
-    else{
-      // edit and save
-      return this.postService.editPost(edit_post_info)
-    }    
-  }
+  //   if (permission == false){
+  //     return{
+  //       'status' : '403 Forbidden'
+  //     }
+  //   }
+  //   else{
+  //     // edit and save
+  //     return this.postService.editPost(edit_post_info)
+  //   }    
+  // }
 
   @Post('delete')
   async deletePost(@Body() delete_info){
@@ -74,7 +80,10 @@ export class PostController {
         const post_info = await this.postService.findPostById(delete_info.post_id)
 
         // Delete previous file if it exists
-        await fs.unlinkSync(post_info.file_path);
+        // get file path from video_id 
+        const path = (await this.videoService.findFromId(post_info.video_id)).product_path;
+
+        await fs.unlinkSync(path);
         await this.privilegeService.delete_post(delete_info.post_id);
         await this.postService.deletePost(delete_info.post_id);
         console.log('delete post success');

@@ -1,15 +1,16 @@
 import { BaseEntity,Entity,PrimaryGeneratedColumn, Column, UpdateDateColumn} from "typeorm";
 
 @Entity( {name : "post"} )
-export class Posts extends BaseEntity{
+export class post extends BaseEntity{
 
     @PrimaryGeneratedColumn()
     post_id:number
+    
     @Column()
-    text:string
+    post_description:string
 
     @Column()
-    file_path:string
+    video_id:number
 
     @UpdateDateColumn()
     createAt:Date
