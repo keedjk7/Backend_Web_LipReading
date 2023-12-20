@@ -28,11 +28,11 @@ export class User extends BaseEntity{
     @Column()
     account_status : string
 
-    @Column()
-    wallet_path : string;
+    // @Column()
+    // wallet_path : string;
 
-    @Column()
-    own_space : string;
+    // @Column()
+    // own_space : string;
     
     @UpdateDateColumn()
     // @UpdateDateColumn({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

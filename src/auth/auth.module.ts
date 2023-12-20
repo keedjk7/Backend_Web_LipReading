@@ -51,12 +51,13 @@ import { UserWorkspaceModule } from 'src/user_workspace/user_workspace.module';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
+        secret: '${process.env.JWT_SECRET}',
         signOptions: { expiresIn: '1d' },
       }),
       inject: [ConfigService],
     }),
   ],
+  controllers: [AuthController],
   providers: [
     AuthService,
     JwtStrategy
