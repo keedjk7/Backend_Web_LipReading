@@ -21,13 +21,14 @@ export class TeamService {
                 // createTeamDto.picture_name = createTeamDto.team_name + '_' + createTeamDto.picture_name ;
 
                 // check extension from base64
-                const extension = this.getExtension(createTeamDto.picture_team_content.charAt(0));
-
+                const extension = await this.getExtension(createTeamDto.picture_team_content.charAt(0));
+                console.log('ex',extension)
                 // generate unique name
                 let image_name = `${uuidv4()}`;
 
                 // file name + extension
                 image_name = image_name + extension;
+                console.log(image_name)
 
                 let Content = createTeamDto.picture_team_content;
                 Content = Content.replace(/^data:(.*?);base64,/, ''); // <--- make it any type
@@ -36,7 +37,7 @@ export class TeamService {
                 const picture_path = `./src/picture_team/${image_name}`; // Use backticks here
 
                 console.log("---------show---------")
-                console.log(image_name,picture_path,extension)
+                console.log(picture_path)
 
                 await fs.promises.writeFile(picture_path, Content, 'base64');
 
@@ -144,6 +145,8 @@ export class TeamService {
              else{
                 console.log('other extension')
              }
+
+             console.log(extension)
              return extension
     }
     

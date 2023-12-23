@@ -24,6 +24,7 @@ export class PostService {
     }
 
     async createPost(createPostDto:CreatePostDto){
+        // 
         // // tran base64 to file and save
 
         // let file_path = null;
