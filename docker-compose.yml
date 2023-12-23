@@ -1,28 +1,9 @@
-version: '3'
+version: '2.17'
 services:
-  mysql:
-    image: mysql:latest
-    container_name: mysql
-    command: --default-authentication-plugin=caching_sha2_password
-    environment:
-      MYSQL_ROOT_PASSWORD: temppwd1234
-      MYSQL_DATABASE: back_lip
-    ports:
-      - "3306:3306"
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      PMA_USER: root
-      PMA_PASSWORD: temppwd1234 
-    ports:
-      - "8081:80"
-    depends_on:
-      - mysql
   node-server:
-    build: .
-    ports:
-      - "5000:5000"
-    depends_on:
-      - mysql
+    build:
+      context: .
+      dockerfile: dockerfile
+    environment:
+      - DB_HOST=host.docker.internal
+    command: npm run start
