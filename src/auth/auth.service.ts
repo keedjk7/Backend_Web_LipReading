@@ -101,7 +101,7 @@ export class AuthService {
             if(!info){
                 throw new UnauthorizedException('Token Invalid')
             }
-            console.log(info)
+            // console.log(info)
             const user = await this.userService.findById(info.user_id);
         
             return user;
@@ -116,7 +116,7 @@ export class AuthService {
         if(!info){
             throw new UnauthorizedException('Token Invalid')
         }
-        console.log('checkToken',info)
+        // console.log('checkToken',info)
 
         return info.user_id;
     }

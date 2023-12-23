@@ -1,9 +1,9 @@
-import { Injectable, Post } from '@nestjs/common';
-import { Posts } from './post.entity';
+import { ConsoleLogger, Injectable, Post } from '@nestjs/common';
 import * as fs from 'fs';
 import { CreatePostDto } from './create-post.dto';
 import { EditPostDto } from './edit-post.dto';
 import { TeamService } from 'src/team/team.service';
+import { post } from './posts.entity';
 
 @Injectable()
 export class PostService {
@@ -24,91 +24,95 @@ export class PostService {
     }
 
     async createPost(createPostDto:CreatePostDto){
-        // tran base64 to file and save
+        // 
+        // // tran base64 to file and save
 
-        let file_path = null;
-        if (createPostDto.file_content != null) {
-            // get extension
-            const extension = this.teamService.getExtension(createPostDto.file_content.charAt(0));
+        // let file_path = null;
+        // if (createPostDto.file_content != null) {
+        //     // get extension
+        //     const extension = this.teamService.getExtension(createPostDto.file_content.charAt(0));
 
-            // generate unique name
-            let image_name = '${uuidv4()}'
-            // file name + extension
-            image_name = image_name + extension
+        //     // generate unique name
+        //     let image_name = '${uuidv4()}'
+        //     // file name + extension
+        //     image_name = image_name + extension
 
-            let Content = createPostDto.file_content;
-            Content = Content.replace(/^data:(.*?);base64,/, ''); // <--- make it any type
-            Content = Content.replace(/ /g, '+'); // <--- this is important
+        //     let Content = createPostDto.file_content;
+        //     Content = Content.replace(/^data:(.*?);base64,/, ''); // <--- make it any type
+        //     Content = Content.replace(/ /g, '+'); // <--- this is important
 
-            const file_path = './src/post_file/${image_name}';
+        //     const file_path = './src/post_file/${image_name}';
 
-            await fs.promises.writeFile(file_path, Content, 'base64');
-        }
+        //     await fs.promises.writeFile(file_path, Content, 'base64');
+        // }
 
+        console.log('pass1')
 
-        const posts = Posts.create({
-            text: createPostDto.text,
-            file_path: file_path
+        const posts = post.create({
+            post_description: createPostDto.post_description,
+            video_id: createPostDto.video_id
         });
 
-        const post_return = await posts.save();
+        await posts.save();
 
-        return post_return;
+        console.log('pass2')
+
+        return posts;
 
     }
 
     async deletePost(post_id:number){
-        await Posts.delete(post_id);
+        await post.delete(post_id);
             
         return "delete post success";
     }
 
-    async editPost(editPostDto:EditPostDto){
-        let change_data = await this.findPostById(editPostDto.post_id)
-        // console.log(change_data)
+    // async editPost(editPostDto:EditPostDto){
+    //     let change_data = await this.findPostById(editPostDto.post_id)
+    //     // console.log(change_data)
 
-        // text
-        change_data.text = editPostDto.text;
-        // // team desc
-        // change_data.team_description = edit_team_info.team_description ;
-        // team image
-        // Check if there's a new file
-        console.log(editPostDto)
-        if (editPostDto.file_content != null) {
-             // check extension from base64
-             const extension = this.teamService.getExtension(editPostDto.file_content.charAt(0));
+    //     // text
+    //     change_data.post_description = editPostDto.post_description;
+    //     // // team desc
+    //     // change_data.team_description = edit_team_info.team_description ;
+    //     // team image
+    //     // Check if there's a new file
+    //     console.log(editPostDto)
+    //     if (editPostDto.file_content != null) {
+    //          // check extension from base64
+    //          const extension = this.teamService.getExtension(editPostDto.file_content.charAt(0));
 
-             // generate unique name
-             let image_name = '${uuidv4()}'
-             // file name + extension
-             image_name = image_name + extension
-             // // Save the new file
-             let Content = editPostDto.file_content;
-             Content = Content.replace(/^data:(.*?);base64,/, ''); // <--- make it any type
-             Content = Content.replace(/ /g, '+'); // <--- this is important
+    //          // generate unique name
+    //          let image_name = '${uuidv4()}'
+    //          // file name + extension
+    //          image_name = image_name + extension
+    //          // // Save the new file
+    //          let Content = editPostDto.file_content;
+    //          Content = Content.replace(/^data:(.*?);base64,/, ''); // <--- make it any type
+    //          Content = Content.replace(/ /g, '+'); // <--- this is important
  
-             const file_path = './src/post_file/${image_name}';
+    //          const file_path = './src/post_file/${image_name}';
 
-            console.log('pass')
-            // console.log(edit_team_info)
-            // Save the file with the proper extension
-            await fs.writeFileSync(file_path, Content, 'base64');
-            change_data.file_path = file_path;
-        }
-        // non file -> delete old file if have in database
-        else{
-            // delete file in file path
+    //         console.log('pass')
+    //         // console.log(edit_team_info)
+    //         // Save the file with the proper extension
+    //         await fs.writeFileSync(file_path, Content, 'base64');
+    //         change_data.file_path = file_path;
+    //     }
+    //     // non file -> delete old file if have in database
+    //     else{
+    //         // delete file in file path
 
-            // delete file path in database
-        }
-        console.log(change_data)
-        await Posts.update(editPostDto.post_id,change_data);
+    //         // delete file path in database
+    //     }
+    //     console.log(change_data)
+    //     await Posts.update(editPostDto.post_id,change_data);
 
-        return '200 OK'
-    }
+    //     return '200 OK'
+    // }
 
     async findPostById(post_id: number) {
-        return await Posts.findOne({
+        return await post.findOne({
             where: {
                 post_id:post_id
             }

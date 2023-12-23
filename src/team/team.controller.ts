@@ -8,11 +8,13 @@ import { EditTeamDto } from './edit-team.dto';
 
 import * as fs from 'fs';
 import { PostService } from 'src/post/post.service';
+import { VideoService } from 'src/video/video.service';
 
 @Controller('team')
 export class TeamController {
   constructor(private readonly teamService: TeamService,private readonly authService: AuthService,
-    private readonly usersService: UsersService,private readonly privilegeService: PrivilegeService,private readonly postService: PostService) {}
+    private readonly usersService: UsersService,private readonly privilegeService: PrivilegeService,private readonly postService: PostService,
+    private readonly videoService: VideoService) {}
 
   @Post('create')
   async create_team(@Body()createTeamDto:CreateTeamDto){
@@ -88,6 +90,7 @@ export class TeamController {
   }
 
 
+  // call edit teamPage
   @Post('editTeam')
   async editTeam(@Body() getInfo){
     // get user_id from token
@@ -110,6 +113,7 @@ export class TeamController {
   // edit team
   @Post('saveTeamInfo')
   async saveTeamInfo(@Body() edit_team_info:EditTeamDto){
+    console.log(edit_team_info)
     // get user_id from token
     const user_id = await this.authService.getUserByToken(edit_team_info.access_token);
     // find user Role by team_id & user_id
@@ -145,8 +149,10 @@ export class TeamController {
   //   return members;
   // }
 
+  // teamWebPage
   @Post('teamWebPage')
   async teamWebPage(@Body() info){
+    console.log("info show",info,"end")
      // get user_id from token
      const user_id = await this.authService.getUserByToken(info.access_token);
 
@@ -155,8 +161,11 @@ export class TeamController {
     //  get team info from team_id
     const team_info = await this.teamService.TeamfindById(info.team_id);
 
+    //  team image to base 64
+    const team_picture = await this.teamService.imageToBase64(team_info.picture_team);
+
     // count member in team
-    const count_member = await this.privilegeService.countMemberTeam(info.team_id);
+    const count_member = (await this.privilegeService.countMemberTeam(info.team_id)).count_member;
     // // all member in team
     // const members = await this.privilegeService.findMemberInTeam(info.team_id)
     
@@ -166,39 +175,44 @@ export class TeamController {
     const teams_info = [];
       // get each user info
       for(let i=0;i<teams.length;i++){
-        const info = await this.teamService.TeamfindById(teams[i].team_id);
+        const info_loop = await this.teamService.TeamfindById(teams[i].team_id);
 
-        const imageBase64 = await this.teamService.imageToBase64(info.picture_team);
+        const imageBase64 = await this.teamService.imageToBase64(info_loop.picture_team);
 
         const edit_info = {
-          'team_id' : info.team_id,
+          'team_id' : info_loop.team_id,
           // picture
-          'team_name' : info.team_name,
-          'team_picture' : imageBase64
+          'team_name' : info_loop.team_name,
+          'image_content' : imageBase64
         }
 
         teams_info.push(edit_info);
       }
 
-      // post in this team
-      const posts_privilege = await this.privilegeService.findPostByTeamId(info.team_id);
-      const posts_info = [];
-      // get each user info
-      for(let i=0;i<posts_privilege.length;i++){
-        const info = await this.postService.findPostById(posts_privilege[i].post_id);
+      // แปป แก้ post ก่อน
+      // // post in this team
+      // const posts_privilege = await this.privilegeService.findPostByTeamId(info.team_id);
+      // const posts_info = [];
+      // // get each user info
+      // for(let i=0;i<posts_privilege.length;i++){
+      //   const info = await this.postService.findPostById(posts_privilege[i].post_id);
 
-        const fileBase64 = await this.teamService.imageToBase64(info.file_path);
-        const username = (await this.usersService.findById(posts_privilege[i].user_id)).username
-        const edit_info = {
-          'user_id' : posts_privilege[i].user_id,
-          'Post_user' : username,
-          'Post_Date' : info.createAt,
-          'Post_image' : fileBase64,
-          'Post_description' : info.text
-        }
+      //   // get file path from video_id 
+      //   const path = (await this.videoService.findFromId(info.video_id)).product_path;
 
-        posts_info.push(edit_info);
-      }
+      //   const fileBase64 = await this.teamService.imageToBase64(path);
+      //   const username = (await this.usersService.findById(posts_privilege[i].user_id)).username
+      //   const edit_info = {
+      //     'user_id' : posts_privilege[i].user_id,
+      //     'Post_user' : username,
+      //     'Post_Date' : info.createAt,
+      //     'Post_image' : fileBase64,
+      //     'Post_description' : info.post_description
+      //   }
+
+      //   posts_info.push(edit_info);
+      // }
+      console.log("--------end webPage--------")
 
       // merge all
       return{
@@ -207,14 +221,19 @@ export class TeamController {
         'team_id' : team_info.team_id,
         'team_name' : team_info.team_name,
         'team_description' : team_info.team_description,
+        'team_picture' : team_picture,
         'team_count_member' : count_member,
         'teams' : teams_info,
-        'posts' : posts_info
+        // แก้ post
+        // 'posts' : posts_info
+        'posts' : []
       }
   }
 
+  // call Team Management Member
   @Post('getManagment')
   async Managment(@Body() getInfo){
+    console.log(getInfo)
     // get user_id from token
     const user_id = await this.authService.getUserByToken(getInfo.access_token);
     // check permission privilege user role
@@ -228,17 +247,21 @@ export class TeamController {
     }
     else{
       const memberPrivilege = await this.privilegeService.show_team_privilege(getInfo.team_id);
-
+      console.log('---------------')
+      console.log(memberPrivilege)
       const members = [];
+
       // get each user info
       for(let i=0;i<memberPrivilege.length;i++){
+        console.log(memberPrivilege[i])
+        // console.log(memberPrivilege[i].user_id)
         const member_info = await this.usersService.findById(memberPrivilege[i].user_id);
-
+        console.log('loop',member_info)
+        
         const edit_info = {
           'user_id' : member_info.id,
           // member picture ยังไม่ได้ทำส่วนนี้
-          'surename' : member_info.surname,
-          'lastname' : member_info.lastname,
+          'member_name ' : member_info.surname + member_info.lastname,
           'Role' : memberPrivilege[i].role
         }
 

@@ -46,13 +46,19 @@ export class UserWorkspaceService {
         // Create modified object with desired fields
         const videoes_info = [];
         for(let i = 0; i < videoes.length; i++){
-        const modifiedVideoInfo = {
-            'video_id': videoes[i].video_id,
-            'video_name': videoes[i].video_name,
-            'video_date': videoes[i].createAt
-        };
 
-        videoes_info.push(modifiedVideoInfo);
+            // if (i==0){
+            //     console.log(typeof videoes[i].createAt)
+            //     console.log(videoes[i].createAt)
+            // }
+            
+            const modifiedVideoInfo = {
+                'video_id': videoes[i].video_id,
+                'video_name': videoes[i].video_name,
+                'video_date': videoes[i].createAt
+            };
+
+            videoes_info.push(modifiedVideoInfo);
         }
         // merge
         const merge_data = {

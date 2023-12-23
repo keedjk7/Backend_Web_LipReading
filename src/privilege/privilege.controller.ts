@@ -79,5 +79,9 @@ export class PrivilegeController {
     }
   }
 
+  @Post('test')
+  async test(@Body() test){
+    return this.privilegeService.show_team_privilege(test.team_id)
+  }
 
 }

@@ -21,27 +21,35 @@ export class TeamService {
                 // createTeamDto.picture_name = createTeamDto.team_name + '_' + createTeamDto.picture_name ;
 
                 // check extension from base64
-                const extension = this.getExtension(createTeamDto.picture_team_content.charAt(0));
-
+                const extension = await this.getExtension(createTeamDto.picture_team_content.charAt(0));
+                console.log('ex',extension)
                 // generate unique name
-                let image_name = '${uuidv4()}'
+                let image_name = `${uuidv4()}`;
+
                 // file name + extension
-                image_name = image_name + extension
+                image_name = image_name + extension;
+                console.log(image_name)
 
                 let Content = createTeamDto.picture_team_content;
                 Content = Content.replace(/^data:(.*?);base64,/, ''); // <--- make it any type
                 Content = Content.replace(/ /g, '+'); // <--- this is important
-    
-                const picture_path = './src/picture_team/${image_name}';
-    
+
+                const picture_path = `./src/picture_team/${image_name}`; // Use backticks here
+
+                console.log("---------show---------")
+                console.log(picture_path)
+
                 await fs.promises.writeFile(picture_path, Content, 'base64');
-    
+
                 const team = Team.create({
                     team_name: createTeamDto.team_name,
                     team_description: createTeamDto.team_description,
                     picture_team: picture_path,
                     team_status: 'active',
                 });
+
+// Rest of your code remains unchanged...
+
     
                 const saveTeam = await team.save();
     
@@ -73,11 +81,13 @@ export class TeamService {
         // team name
         change_data.team_name = edit_team_info.team_name;
         // team desc
-        change_data.team_description = edit_team_info.team_description ;
+        if (typeof edit_team_info.team_description != "undefined"){
+            change_data.team_description = edit_team_info.team_description ;
+        }
         // team image
         // Check if there's a new image
         console.log(edit_team_info)
-        if (edit_team_info.picture_team_content != null) {
+        if (typeof edit_team_info.picture_team_content != "undefined") {
              // check extension from base64
              const extension = this.getExtension(edit_team_info.picture_team_content.charAt(0));
 
@@ -135,6 +145,8 @@ export class TeamService {
              else{
                 console.log('other extension')
              }
+
+             console.log(extension)
              return extension
     }
     

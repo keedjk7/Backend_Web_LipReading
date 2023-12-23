@@ -35,8 +35,8 @@ export class PrivilegeService {
 
     // show all member and each role in team
     async show_team_privilege(team_id){
-        const team_privilege = this.findMemberInTeam(team_id);
-        console.log(team_privilege);
+        const team_privilege = await this.findMemberInTeam(team_id);
+        // console.log(team_privilege);
         return team_privilege;
     }
 
@@ -187,8 +187,12 @@ export class PrivilegeService {
                 console.log('Fail to Change Role');
             }
         }
-        // team_owner can edit team and delete team
-        else if((event == 'edit_team' || event == 'delete_team')&& changer_role == 'Owner'){
+        // team_owner&&Admin can edit team 
+        else if((event == 'edit_team' || event == 'delete_team')&& (changer_role == 'Owner'||changer_role == 'Admin')){
+            permission = true;
+        }
+        // team_owner can delete team
+        else if(event == 'delete_team' && changer_role == 'Owner'){
             permission = true;
         }
         // Post_Owner can edit post

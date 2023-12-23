@@ -32,7 +32,7 @@ export class AuthController {
 
   @Post('check_token_team')
   async check_token_team(@Body() token) {
-    // console.log(request);
+    console.log(token);
     try {
       const merge_data = await this.authService.checkToken_get_team(token.access_token);
   
@@ -40,6 +40,7 @@ export class AuthController {
       const updatedMergeData = await Promise.all(merge_data.map(async (teamObj) => {
         try {
           const base64String = await this.teamService.imageToBase64(teamObj.picture_team);
+          console.log(base64String)
           return { ...teamObj, picture_team: base64String };
         } catch (error) {
           // Handle errors during conversion for individual team objects
@@ -47,7 +48,7 @@ export class AuthController {
           return teamObj; // Return the original team object in case of error
         }
       }));
-      console.log(updatedMergeData);
+      // console.log(updatedMergeData);
       return updatedMergeData;
     } catch (error) {
       throw new UnauthorizedException('Failed to fetch team data');

@@ -5,6 +5,7 @@ import { PrivilegeModule } from 'src/privilege/privilege.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { UsersModule } from 'src/users/users.module';
 import { PostModule } from 'src/post/post.module';
+import { VideoModule } from 'src/video/video.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { PostModule } from 'src/post/post.module';
     forwardRef(()=>UsersModule), 
     forwardRef(()=>AuthModule),
     forwardRef(()=>PostModule),
+    forwardRef(()=>VideoModule),
   ],
   controllers: [TeamController],
   providers: [TeamService],

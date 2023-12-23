@@ -11,7 +11,7 @@ export class EditPostDto{
     @IsNotEmpty()
     team_id:number
 
-    text:string
+    post_description:string
 
     // file_name : string
 

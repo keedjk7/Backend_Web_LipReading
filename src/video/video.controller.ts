@@ -20,55 +20,53 @@ export class VideoController {
   //     video_name: (file.filename as string), video_path: (file.path as string)
   //   })
   // }
-  // upload
-  // @Post('upload')
-  // async uploadFile(@Body() createVideoDto:CreateVideoDto){
-  //   // console.log(createVideoDto)
-  //   // // return this.videoService.convertFile(file.content,file.video_name)+
-  //   // // const path = this.videoService.convertFile(file.content,file.video_name)
-  //   // return this.videoService.create({
-  //   //   video_name: file.video_name,
-  //   //   // video_path: this.videoService.convertFile(file.content,file.video_name)
-  //   // })
-    
-  //   // return this.videoService.create(createVideoDto);
-  //   // return this.videoService.lipreading(createVideoDto);
-
-  //   // process lip reading
-  //   const video_obj = await this.videoService.lipreading(createVideoDto);
-  //   console.log(video_obj);
-  //   // check not have token (anonymous)
-  //   if(createVideoDto.access_token == null){
-  //     return this.videoService.create(video_obj,createVideoDto,0);
-  //   }
-  //   // check have token (user account)
-  //   else{
-  //     // get user_id
-  //     const user_id = await this.authService.getUserByToken(createVideoDto.access_token);
-
-  //     return this.videoService.create(video_obj,createVideoDto,user_id);
-  //   }
-    
-
-  // }
-
-  // upload other solution
+  upload
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    console.log(file);
-    // const file_path = './your/desired/file/path/' + file.originalname; // กำหนด file path ที่ต้องการบันทึกไฟล์
+  async uploadFile(@Body() createVideoDto:CreateVideoDto){
+    console.log(createVideoDto)
+    // // return this.videoService.convertFile(file.content,file.video_name)+
+    // // const path = this.videoService.convertFile(file.content,file.video_name)
+    // return this.videoService.create({
+    //   video_name: file.video_name,
+    //   // video_path: this.videoService.convertFile(file.content,file.video_name)
+    // })
+    
+    // return this.videoService.create(createVideoDto);
+    // return this.videoService.lipreading(createVideoDto);
 
-    // try {
-    //   fs.writeFileSync(file_path, file.buffer); // บันทึกไฟล์ลงใน file path ที่กำหนด
-    //   console.log('File saved successfully at:', file_path);
-    //   // สามารถทำการ return หรือทำสิ่งอื่นต่อได้ตามต้องการ
-    // } catch (error) {
-    //   console.error('Error saving file:', error);
-    //   // ในกรณีที่มีข้อผิดพลาดในการบันทึกไฟล์
-    //   // สามารถทำการ handle error หรือทำสิ่งอื่นต่อได้ตามต้องการ
-    // }
+    // process lip reading
+    const video_obj = await this.videoService.lipreading(createVideoDto);
+    console.log(video_obj);
+    // check not have token (anonymous)
+    if(createVideoDto.access_token == null){
+      return this.videoService.create(video_obj,createVideoDto,0);
+    }
+    // check have token (user account)
+    else{
+      // get user_id
+      const user_id = await this.authService.getUserByToken(createVideoDto.access_token);
+
+      return this.videoService.create(video_obj,createVideoDto,user_id);
+    }
   }
+
+  // // upload other solution
+  // @Post('upload')
+  // @UseInterceptors(FileInterceptor('file'))
+  // async uploadFile(@UploadedFile() file: Express.Multer.File) {
+  //   console.log(file);
+  //   // const file_path = './your/desired/file/path/' + file.originalname; // กำหนด file path ที่ต้องการบันทึกไฟล์
+
+  //   // try {
+  //   //   fs.writeFileSync(file_path, file.buffer); // บันทึกไฟล์ลงใน file path ที่กำหนด
+  //   //   console.log('File saved successfully at:', file_path);
+  //   //   // สามารถทำการ return หรือทำสิ่งอื่นต่อได้ตามต้องการ
+  //   // } catch (error) {
+  //   //   console.error('Error saving file:', error);
+  //   //   // ในกรณีที่มีข้อผิดพลาดในการบันทึกไฟล์
+  //   //   // สามารถทำการ handle error หรือทำสิ่งอื่นต่อได้ตามต้องการ
+  //   // }
+  // }
 
   // download
   @Post('download')
@@ -76,17 +74,46 @@ export class VideoController {
     console.log("check",downloadVideoDto)
     
     // not have token (anonymous)
-    if(downloadVideoDto.access_token == null){
+    if(typeof downloadVideoDto.access_token == 'undefined'){
+      console.log('donwload case anonymous')
       return this.videoService.download(downloadVideoDto.video_id,0)
     }
     // have token (user_account)
     else{
+      console.log('donwload case user')
       const user_id = await this.authService.getUserByToken(downloadVideoDto.access_token);
       console.log('user_id',user_id);
       return this.videoService.download(downloadVideoDto.video_id,user_id)
     }
   }
+
+  // download subtitle
+  @Post('download_subtitle')
+  async download_subtitle(@Body() downloadVideoDto:DownloadVideoDto){
+    console.log("check",downloadVideoDto)
+    console.log('donwload case user')
+    const user_id = await this.authService.getUserByToken(downloadVideoDto.access_token);
+    return this.videoService.download_subtitle(downloadVideoDto.video_id,user_id)
+
+    // have token (user_account)
+  }
+
+  @Post('download_video')
+  async download_video(@Body() downloadVideoDto:DownloadVideoDto){
+    console.log("check",downloadVideoDto)
+    console.log('donwload case user')
+    const user_id = await this.authService.getUserByToken(downloadVideoDto.access_token);
+    return this.videoService.download_video(downloadVideoDto.video_id,user_id)
+
+    // have token (user_account)
+  }
     
+
+  // getAllvideoUser
+  @Post('getVideo')
+  async getViddeo(@Body() token){
+    return this.videoService.findVideoByCreateId(token.access_token);
+  }
 
   // // history
   // @Get('history')

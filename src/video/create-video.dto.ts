@@ -7,7 +7,6 @@ export class CreateVideoDto{
     // @IsNotEmpty()
     // username : string;
     
-    @IsNotEmpty()
     video_name : string;
 
     @IsNotEmpty()
