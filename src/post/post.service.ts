@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { CreatePostDto } from './create-post.dto';
 import { EditPostDto } from './edit-post.dto';
 import { TeamService } from 'src/team/team.service';
-import { post } from './posts.entity';
+import { Posts } from './posts.entity';
 
 @Injectable()
 export class PostService {
@@ -24,8 +24,8 @@ export class PostService {
     }
 
     async createPost(createPostDto:CreatePostDto){
-        // 
-        // // tran base64 to file and save
+        
+        // tran base64 to file and save
 
         // let file_path = null;
         // if (createPostDto.file_content != null) {
@@ -48,21 +48,22 @@ export class PostService {
 
         console.log('pass1')
 
-        const posts = post.create({
+        const posts = Posts.create({
             post_description: createPostDto.post_description,
             video_id: createPostDto.video_id
         });
 
-        await posts.save();
+        const test_post = await posts.save();
 
         console.log('pass2')
+        console.log(test_post)
 
         return posts;
 
     }
 
     async deletePost(post_id:number){
-        await post.delete(post_id);
+        await Posts.delete(post_id);
             
         return "delete post success";
     }
@@ -112,7 +113,7 @@ export class PostService {
     // }
 
     async findPostById(post_id: number) {
-        return await post.findOne({
+        return await Posts.findOne({
             where: {
                 post_id:post_id
             }

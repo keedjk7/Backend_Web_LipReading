@@ -4,7 +4,6 @@ export class CreateTeamDto{
     @IsNotEmpty()
     access_token:string;
 
-    @IsNotEmpty()
     team_name:string;
 
     team_description:string;

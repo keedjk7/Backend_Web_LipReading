@@ -161,6 +161,8 @@ export class TeamController {
     //  get team info from team_id
     const team_info = await this.teamService.TeamfindById(info.team_id);
 
+    console.log(team_info)
+
     //  team image to base 64
     const team_picture = await this.teamService.imageToBase64(team_info.picture_team);
 
@@ -189,29 +191,34 @@ export class TeamController {
         teams_info.push(edit_info);
       }
 
-      // แปป แก้ post ก่อน
-      // // post in this team
-      // const posts_privilege = await this.privilegeService.findPostByTeamId(info.team_id);
-      // const posts_info = [];
-      // // get each user info
-      // for(let i=0;i<posts_privilege.length;i++){
-      //   const info = await this.postService.findPostById(posts_privilege[i].post_id);
+      // post in this team
+      const posts_privilege = await this.privilegeService.findPostByTeamId(info.team_id);
+      const posts_info = [];
+      // get each user info
+      for(let i=0;i<posts_privilege.length;i++){
+        const info = await this.postService.findPostById(posts_privilege[i].post_id);
 
-      //   // get file path from video_id 
-      //   const path = (await this.videoService.findFromId(info.video_id)).product_path;
+        console.log(posts_privilege,info)
 
-      //   const fileBase64 = await this.teamService.imageToBase64(path);
-      //   const username = (await this.usersService.findById(posts_privilege[i].user_id)).username
-      //   const edit_info = {
-      //     'user_id' : posts_privilege[i].user_id,
-      //     'Post_user' : username,
-      //     'Post_Date' : info.createAt,
-      //     'Post_image' : fileBase64,
-      //     'Post_description' : info.post_description
-      //   }
+        // get file path from video_id 
+        // const path = (await this.videoService.findFromId(info.video_id)).product_path;
 
-      //   posts_info.push(edit_info);
-      // }
+        // const fileBase64 = await this.teamService.imageToBase64(path);
+        const user = (await this.usersService.findById(posts_privilege[i].user_id))
+        console.log(user)
+        const username = user.username
+        
+        const edit_info = {
+          'user_id' : posts_privilege[i].user_id,
+          'Post_user' : username,
+          'Post_id' : posts_privilege[i].post_id,
+          'Post_Date' : info.createAt,
+          // 'Post_image' : fileBase64,
+          'Post_description' : info.post_description
+        }
+
+        posts_info.push(edit_info);
+      }
       console.log("--------end webPage--------")
 
       // merge all
@@ -226,7 +233,7 @@ export class TeamController {
         'teams' : teams_info,
         // แก้ post
         // 'posts' : posts_info
-        'posts' : []
+        'posts' : posts_info
       }
   }
 
@@ -236,6 +243,8 @@ export class TeamController {
     console.log(getInfo)
     // get user_id from token
     const user_id = await this.authService.getUserByToken(getInfo.access_token);
+    // get role
+    const user_privilege_info = await this.privilegeService.findPrivilegeByUserAndTeam(user_id,getInfo.team_id);
     // check permission privilege user role
     const user_privilege = await this.privilegeService.findPrivilegeByUserAndTeam(user_id,getInfo.team_id);
     const permission = await this.privilegeService.privilege_permission(user_privilege.role,'None','edit_team');
@@ -259,16 +268,19 @@ export class TeamController {
         console.log('loop',member_info)
         
         const edit_info = {
-          'user_id' : member_info.id,
+          user_id : member_info.id,
           // member picture ยังไม่ได้ทำส่วนนี้
-          'member_name ' : member_info.surname + member_info.lastname,
-          'Role' : memberPrivilege[i].role
+          member_name : member_info.username,
+          Role : memberPrivilege[i].role
         }
 
         members.push(edit_info);
       }
+      console.log('----',memberPrivilege.length,members)
 
       return{
+        'role' : user_privilege_info.role,
+        // มีส่งรูป
         'count_member' : memberPrivilege.length,
         'member' : members,
         'status' : '200 OK'

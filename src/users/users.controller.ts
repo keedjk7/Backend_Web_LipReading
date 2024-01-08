@@ -1,18 +1,42 @@
 import { Body, Controller, Get, Param, Post, Response } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './create-user.dto';
+import { AuthService } from 'src/auth/auth.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService,private readonly authService: AuthService) {}
 
 
   @Post('register')
-  create_user(@Body() createUserDto:CreateUserDto){
+  async create_user(@Body() createUserDto:CreateUserDto){
     // const birthdayDate = new Date(sign_up.birthday);
     // sign_up.birthday = birthdayDate;
     // const createUserDto : sign_up
-    return this.usersService.create(createUserDto);
+    console.log('register')
+    const status =  await this.usersService.create(createUserDto);
+    if (status != '200 OK'){
+      return {
+        status :status
+      }
+    }
+    else{
+      // login and get token
+      const access_token = await this.authService.login({
+        "email" : createUserDto.email,
+        "username" : createUserDto.username,
+        "password" : createUserDto.password
+      })
+
+      // console.log("test",access_token)
+
+      return {
+        access_token : access_token,
+        status : status
+      }
+    }
+    
+
   }
 
   @Get(':id')

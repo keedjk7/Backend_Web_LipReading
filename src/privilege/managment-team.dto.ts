@@ -4,7 +4,7 @@ export class Managment_team{
 
     access_token:string
 
-    changed_username:string
+    changed_id:number
 
     team_id:number
 

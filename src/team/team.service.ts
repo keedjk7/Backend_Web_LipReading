@@ -79,36 +79,41 @@ export class TeamService {
         // console.log(change_data)
 
         // team name
-        change_data.team_name = edit_team_info.team_name;
+        if (edit_team_info.team_name != ''){
+            change_data.team_name = edit_team_info.team_name;
+        }
+        
         // team desc
-        if (typeof edit_team_info.team_description != "undefined"){
+        if (edit_team_info.team_description!= ''){
             change_data.team_description = edit_team_info.team_description ;
         }
         // team image
         // Check if there's a new image
         console.log(edit_team_info)
-        if (typeof edit_team_info.picture_team_content != "undefined") {
+        if ( edit_team_info.picture_team_content != '') {
              // check extension from base64
-             const extension = this.getExtension(edit_team_info.picture_team_content.charAt(0));
-
+             const extension = await this.getExtension(edit_team_info.picture_team_content.charAt(0));
+             console.log('ex',extension)
              // generate unique name
-             let image_name = '${uuidv4()}'
+             let image_name = `${uuidv4()}`;
+
              // file name + extension
-             image_name = image_name + extension
+             image_name = image_name + extension;
+             console.log(image_name)
              // // Save the new image
              let Content = edit_team_info.picture_team_content;
              Content = Content.replace(/^data:(.*?);base64,/, ''); // <--- make it any type
              Content = Content.replace(/ /g, '+'); // <--- this is important
- 
-             const picture_path = './src/picture_team/${image_name}';
 
-            console.log('pass')
+             const picture_path = `./src/picture_team/${image_name}`; // Use backticks here
+
+            console.log('---------------edit&save-------------------')
             // console.log(edit_team_info)
             // Save the file with the proper extension
             await fs.writeFileSync(picture_path, Content, 'base64');
             change_data.picture_team = picture_path;
         }
-        console.log(change_data)
+        console.log('edit',change_data)
         await Team.update(edit_team_info.team_id,change_data);
 
         return '200 OK'

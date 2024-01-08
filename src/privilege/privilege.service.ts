@@ -47,8 +47,9 @@ export class PrivilegeService {
         const changer_id = await this.authService.getUserByToken(managment_team.access_token);
 
         // find changed_id by username
-        const changed = await this.userService.findByUsername(managment_team.changed_username);
-        const changed_id = changed.id;
+        // const changed = await this.userService.findByUsername(managment_team.changed_username);
+        // const changed_id = changed.id;
+        const changed_id = managment_team.changed_id
 
         // check changer and changed role if changer higher than changed
         const changer_privilege = await this.findPrivilegeByUserAndTeam(changer_id,managment_team.team_id);
@@ -87,10 +88,10 @@ export class PrivilegeService {
         // find changer_id by access_token
         const changer_id = await this.authService.getUserByToken(managment_team.access_token);
 
-        // find changed_id by username
-        const changed = await this.userService.findByUsername(managment_team.changed_username);
-        const changed_id = changed.id;
-
+        // // find changed_id by username
+        // const changed = await this.userService.findByUsername(managment_team.changed_username);
+        // const changed_id = changed.id;
+        const changed_id = managment_team.changed_id
 
         const changer_privilege = await this.findPrivilegeByUserAndTeam(changer_id,managment_team.team_id);
 
@@ -143,10 +144,11 @@ export class PrivilegeService {
         // find changed_id by username
         let changed_id = null;
         // case check permission in only not have changed user
-        if (managment_team.changed_username != null){
-            const changed = await this.userService.findByUsername(managment_team.changed_username);
-            changed_id = changed.id;
-        }
+        // if (managment_team.changed_username != null){
+        //     const changed = await this.userService.findByUsername(managment_team.changed_username);
+        //     changed_id = changed.id;
+        // }
+        changed_id = managment_team.changed_id
         
 
         let permission = false;
@@ -297,8 +299,17 @@ export class PrivilegeService {
          }
     }
 
+    // delet_post
     async delete_post(post_id: number){
-        await Privilege.delete(post_id)
+        console.log('delete post privilege',post_id)
+         // find all pri in this team
+         const posts_privilege = await Privilege.findOne({
+            where: {
+                post_id:post_id,
+            }
+        });
+        
+        await Privilege.delete(posts_privilege.privilege_id)
     }
 
 }

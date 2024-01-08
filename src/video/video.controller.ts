@@ -110,9 +110,15 @@ export class VideoController {
     
 
   // getAllvideoUser
-  @Post('getVideo')
+  @Post('getVideoesUser')
   async getViddeo(@Body() token){
-    return this.videoService.findVideoByCreateId(token.access_token);
+    const user_id = (await this.authService.checkToken_get_user(token.access_token)).id
+    const video = await this.videoService.findVideoByCreateId(user_id);
+    console.log(user_id,video)
+    return {
+      video: video,
+      status: '200 OK'
+    }
   }
 
   // // history

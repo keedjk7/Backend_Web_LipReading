@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Response } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './create-post.dto';
 import { PrivilegeService } from 'src/privilege/privilege.service';
@@ -22,6 +22,8 @@ export class PostController {
     // create new post
     const post_info = await this.postService.createPost(createPostDto);
 
+    console.log(post_info)
+
     // add privilege post
     const postPrivilege = {
       user_id : user_id,
@@ -30,7 +32,8 @@ export class PostController {
       role : 'PostOwner',
     }
     await this.privilegeService.add_privilege(postPrivilege);
-
+    // res.status(200).json({ message: `success` });
+    // return
     return {
       "status" : "200 OK"
     }
@@ -79,11 +82,11 @@ export class PostController {
       if (permission == true){
         const post_info = await this.postService.findPostById(delete_info.post_id)
 
-        // Delete previous file if it exists
-        // get file path from video_id 
-        const path = (await this.videoService.findFromId(post_info.video_id)).product_path;
+        // // Delete previous file if it exists
+        // // get file path from video_id 
+        // const path = (await this.videoService.findFromId(post_info.video_id)).product_path;
 
-        await fs.unlinkSync(path);
+        // await fs.unlinkSync(path);
         await this.privilegeService.delete_post(delete_info.post_id);
         await this.postService.deletePost(delete_info.post_id);
         console.log('delete post success');

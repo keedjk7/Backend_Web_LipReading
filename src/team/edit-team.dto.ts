@@ -11,7 +11,5 @@ export class EditTeamDto{
 
     team_description:string;
 
-    picture_name:string;
-
     picture_team_content:string;
 }

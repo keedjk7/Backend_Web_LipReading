@@ -3,9 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './create-user.dto';
 import { User } from './user.entity';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UsersService {
+    // constructor(
+    //     private authService : AuthService,
+    // ){}
 
     // create user
     async create(createUserDto: CreateUserDto){
@@ -16,15 +20,15 @@ export class UsersService {
             const userWithSameUsername = await User.findOne({ where: { username: createUserDto.username } })
 
             if(userWithSameEmail && userWithSameUsername){
-                return { status: '200 UEE' };
+                return '200 UEE'
             }
 
             if (userWithSameEmail) {
-                return { status: '200 EE' };
+                return '200 EE'
             }
     
             if (userWithSameUsername) {
-                return { status: '200 UE' };
+                return  '200 UE'
             }
     
             const user = User.create({
@@ -37,7 +41,7 @@ export class UsersService {
     
             delete user.password;
     
-            return { status: '200 OK' };
+            return '200 OK' 
         } catch (error) {
             throw error;
         }

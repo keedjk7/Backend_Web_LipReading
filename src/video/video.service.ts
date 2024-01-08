@@ -67,7 +67,7 @@ export class VideoService {
             filename : video.video_name
           });
         }
-       
+       console.log(response.data)
 
         return response.data;   
       }
@@ -99,7 +99,7 @@ export class VideoService {
       // return {
       //   content : response.data
       // };
-      console.log('get_ml')
+      console.log('download_subtitle')
       console.log(response)
 
       //check user_token and user create video same person
@@ -135,50 +135,100 @@ export class VideoService {
   // download video
   async download_video(video_id:number,user_id:number){
     try {
-    // const response = await axios.get(process.env.URL_ML);
-    console.log('id',video_id)
-    // search by id
-    const video = await Video.findOne({ where: { video_id: video_id } })
+      // const response = await axios.get(process.env.URL_ML);
+      console.log('id',video_id)
+      // search by id
+      const video = await Video.findOne({ where: { video_id: video_id } })
 
 
-    console.log(video)
-    const response = await axios.post(process.env.URL_ML_Download, {
-      filename : video.video_name
-    });
-    // return {
-    //   content : response.data
-    // };
-    console.log('get_ml')
-    console.log(response)
+      console.log(video)
+      const response = await axios.post(process.env.URL_ML_Download, {
+        filename : video.video_name
+      });
+      // return {
+      //   content : response.data
+      // };
+      console.log('download_video')
+      console.log(response)
 
-    //check user_token and user create video same person
-    if(video.user_create == user_id){
-      // delete row in table if user_create = null (mean anonymous)
-      // console.log(video.user_create=='')
-      if (video.user_create == 0){
-         this.historyRepository.delete(video_id);
-    
-        // delete file 
-        await axios.post(process.env.URL_FILE_Delete, {
-          filename : video.video_name
-        });
+      //check user_token and user create video same person
+      if(video.user_create == user_id){
+        // delete row in table if user_create = null (mean anonymous)
+        // console.log(video.user_create=='')
+        if (video.user_create == 0){
+          this.historyRepository.delete(video_id);
+      
+          // delete file 
+          await axios.post(process.env.URL_FILE_Delete, {
+            filename : video.video_name
+          });
+        }
+      
+
+        return {
+          "merge_video_content" : response.data.content_merge   
+        }
       }
-     
-
-      return {
-        "merge_video_content" : response.data.content_merge   
+      // not same person
+      else{
+        return 'user_token and user create video not same person';
       }
-    }
-    // not same person
-    else{
-      return 'user_token and user create video not same person';
-    }
 
     
-  } catch (error) {
-    throw new Error(`Error calling API: ${error.message}`);
+    } catch (error) {
+      throw new Error(`Error calling API: ${error.message}`);
+    }
   }
-}
+
+  async download_origin(video_id:number,user_id:number){
+    try {
+      // const response = await axios.get(process.env.URL_ML);
+      console.log('id',video_id)
+      // search by id
+      const video = await Video.findOne({ where: { video_id: video_id } })
+
+
+      console.log(video)
+      const response = await axios.post(process.env.URL_ML_Download, {
+        filename : video.video_name
+      });
+      // return {
+      //   content : response.data
+      // };
+      console.log('download_origin')
+      console.log(response)
+
+      //check user_token and user create video same person
+      if(video.user_create == user_id){
+        // delete row in table if user_create = null (mean anonymous)
+        // console.log(video.user_create=='')
+        if (video.user_create == 0){
+          this.historyRepository.delete(video_id);
+      
+          // delete file 
+          await axios.post(process.env.URL_FILE_Delete, {
+            filename : video.video_name
+          });
+        }
+        console.log(response.data.content_origin)
+
+        return {
+          "origin_content" : response.data.content_origin   
+        }
+      }
+      // not same person
+      else{
+        return 'user_token and user create video not same person';
+      }
+
+      
+    } catch (error) {
+      throw new Error(`Error calling API: ${error.message}`);
+    }
+  }
+
+
+
 
   // convert file
   async convertFile(Content:string,filename:string){
@@ -214,6 +264,48 @@ export class VideoService {
       throw new Error(`Error calling API: ${error.message}`);
     }
   }
+
+  // get frame subtitle eng
+  async getVideoFrame(video_id:number){
+    try {
+      // const response = await axios.get(process.env.URL_ML);
+      // // console.log(process.env.URL_ML)
+      // console.log(createVideoDto.content)
+      const videoName = (await this.findFromId(video_id)).video_name
+      // cut extendtion in video name
+      const fileName = videoName.split('.')[0];
+      console.log(fileName)
+      
+      // get frame eng,thai
+      const response = await axios.post(process.env.URL_Frame_Video, {
+        filename : fileName 
+      });
+      console.log('res:',response.data);
+
+      // return response.data
+
+      const sub_eng = response.data.eng_sub.map(item => ({
+        start: item.start.replace(',', '.').substring(0, 12),
+        end: item.end.replace(',', '.').substring(0, 12),
+        message: item.text?.trim() || '', // Use optional chaining and provide a default value
+      }));
+      
+      const sub_thai = response.data.thai_sub.map(item => ({
+        start: item.start.replace(',', '.').substring(0, 12),
+        end: item.end.replace(',', '.').substring(0, 12),
+        message: item.message.trim() // Access 'message' directly for Thai subtitles
+      }));
+
+
+      return {
+        sub_eng:sub_eng,
+        sub_thai:sub_thai
+       } ;
+    } catch (error) {
+      throw new Error(`Error calling API: ${error.message}`);
+    }
+  }
+
 
   // async getHistory(username: string): Promise<Video[]> {
   //   const history = await this.historyRepository.find({ where: { user_create:username } });

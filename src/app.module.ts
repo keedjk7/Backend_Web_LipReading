@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Post } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -15,9 +15,11 @@ import { Privilege } from './privilege/privilege.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { UserWorkspaceModule } from './user_workspace/user_workspace.module';
 import { PostModule } from './post/post.module';
+import { TeamPostPageModule } from './team_post_page/team_post_page.module';
+import { Posts } from './post/posts.entity';
 
 require("dotenv").config();
-const entities = [User,Video,Team,Privilege]
+const entities = [User,Video,Team,Privilege,Posts]
 
 @Module({
   imports: [
@@ -31,6 +33,7 @@ const entities = [User,Video,Team,Privilege]
       port : parseInt(process.env.DB_PORT),
       username : process.env.DB_USER,
       // password: process.env.DB_PASSWORD,
+      password: null,
       database : process.env.DB_NAME,
       entities : entities,
       synchronize : true,
@@ -63,6 +66,7 @@ const entities = [User,Video,Team,Privilege]
     PrivilegeModule,
     UserWorkspaceModule,
     PostModule,
+    TeamPostPageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
