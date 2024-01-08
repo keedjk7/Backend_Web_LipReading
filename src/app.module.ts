@@ -33,10 +33,30 @@ const entities = [User,Video,Team,Privilege,Posts]
       port : parseInt(process.env.DB_PORT),
       username : process.env.DB_USER,
       // password: process.env.DB_PASSWORD,
-      password: null,
+      // password: null,
       database : process.env.DB_NAME,
       entities : entities,
       synchronize : true,
+      // database : process.env.DB_NAME,
+
+      // type: 'mysql',
+      // host: 'mysql',
+      // port: 3306,
+      // username: 'root',
+      // password: 'temppwd1234',
+      // database: 'back_lip',
+      // entities: entities,
+      // synchronize: true,
+
+      //  // server
+      // type: 'mysql',
+      // // host: 'host.docker.internal', // Use the actual IP address of the MySQL container
+      // host: process.env.DB_HOST,
+      // username: 'root',
+      // password: 'temppwd1234',
+      // database: 'back_lip',
+      // entities: entities,
+      // synchronize: false,
       
       // type : 'mysql',
       // host : 'localhost',
@@ -44,15 +64,6 @@ const entities = [User,Video,Team,Privilege,Posts]
       // username : 'root',
       // database : 'back_lip',
       // entities : entities,
-      // synchronize : true,
-
-      // type : 'postgres',
-      // host : process.env.PostgreSQL_Host,
-      // port : parseInt(<string>process.env.PostgreSQL_Port),
-      // username : process.env.PostgreSQL_User,
-      // password : process.env.PostgreSQL_Password,
-      // database : process.env.PostgreSQL_Database,
-      // autoLoadEntities : true,
       // synchronize : true,
     }),
     JwtModule.register({
