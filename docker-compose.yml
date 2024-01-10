@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: dockerfile
+    ports: 
+      - "3000:3000"
     environment:
       - DB_HOST=host.docker.internal
-    command: npm run start
+    command: npm run start:dev
