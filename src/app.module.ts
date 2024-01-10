@@ -27,17 +27,18 @@ const entities = [User,Video,Team,Privilege,Posts]
       isGlobal: true
     }),
     TypeOrmModule.forRoot({
-      type : process.env.DB_TYPE as 'mysql',
-      // type : 'mysql',
-      host : process.env.DB_HOST,
-      port : parseInt(process.env.DB_PORT),
-      username : process.env.DB_USER,
-      // password: process.env.DB_PASSWORD,
-      // password: null,
-      database : process.env.DB_NAME,
-      entities : entities,
-      synchronize : true,
+      // // local
+      // type : process.env.DB_TYPE as 'mysql',
+      // // type : 'mysql',
+      // host : process.env.DB_HOST,
+      // port : parseInt(process.env.DB_PORT),
+      // username : process.env.DB_USER,
+      // // password: process.env.DB_PASSWORD,
+      // // password: null,
       // database : process.env.DB_NAME,
+      // entities : entities,
+      // synchronize : true,
+      // // database : process.env.DB_NAME,
 
       // type: 'mysql',
       // host: 'mysql',
@@ -48,15 +49,16 @@ const entities = [User,Video,Team,Privilege,Posts]
       // entities: entities,
       // synchronize: true,
 
-      //  // server
-      // type: 'mysql',
-      // // host: 'host.docker.internal', // Use the actual IP address of the MySQL container
-      // host: process.env.DB_HOST,
-      // username: 'root',
-      // password: 'temppwd1234',
-      // database: 'back_lip',
-      // entities: entities,
-      // synchronize: false,
+       // server
+      type: 'mysql',
+      // host: 'host.docker.internal', // Use the actual IP address of the MySQL container
+      port: 3306,
+      host: process.env.DB_HOST,
+      username: 'root',
+      password: 'temppwd1234',
+      database: 'back_lip',
+      entities: entities,
+      synchronize: false,
       
       // type : 'mysql',
       // host : 'localhost',

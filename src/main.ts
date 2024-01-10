@@ -12,7 +12,8 @@ async function bootstrap() {
   app.use(cookieParser());
   // Enable CORS with the defined options
   app.enableCors({
-    // origin:'http://localhost:3000',
+    origin: ['http://161.246.5.159:7777', 'http://localhost:3000'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials:true
   });
   app.use(bodyParser.json({limit:'50mb'}))
