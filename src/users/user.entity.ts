@@ -1,4 +1,4 @@
-import { BaseEntity,Entity,PrimaryGeneratedColumn, Column, UpdateDateColumn, BeforeInsert } from "typeorm";
+import { BaseEntity,Entity,PrimaryGeneratedColumn, Column,CreateDateColumn , UpdateDateColumn, BeforeInsert } from "typeorm";
 import * as bcrypt from 'bcryptjs' ;
 
 @Entity( {name : "users"} )
@@ -33,8 +33,11 @@ export class User extends BaseEntity{
 
     @Column()
     own_space : string;
+
+    @Column()
+    profile_image : string
     
-    @UpdateDateColumn()
+    @CreateDateColumn()
     // @UpdateDateColumn({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createAt : Date;
 

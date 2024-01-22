@@ -27,8 +27,10 @@ export class TeamPostPageService {
         const post_info = await this.postService.findPostById(teamPostPageDto.post_id)
         // find video_id from post_id
         const video_id = (await this.postService.findPostById(teamPostPageDto.post_id)).video_id
-        // get file base 64 from video_id
-        const base64Video = await this.videoService.download_origin(video_id,user_id)
+        // get video entity
+        const video = await this.videoService.findFromId(video_id)
+        // // get file base 64 from video_id
+        // const base64Video = await this.videoService.download_origin(video_id,user_id)
         // subtitle eng,thai
         const videoFrameData = await this.videoService.getVideoFrame(video_id);
         const subtitle_eng = videoFrameData.sub_eng;
@@ -44,9 +46,10 @@ export class TeamPostPageService {
         post_id: teamPostPageDto.post_id,
         post_user: user_info.username,
         post_date: post_info.createAt,
-        post_video: (base64Video as { origin_content: any; }).origin_content,
+        video_path: video.product_path,
+        video_id: video_id,
         subtitle_eng: subtitle_eng,
-        Subtitle_thai: subtitle_thai,
+        subtitle_thai: subtitle_thai,
         status : "200 OK"
         }
         console.log(data)

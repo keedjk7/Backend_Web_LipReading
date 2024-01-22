@@ -9,7 +9,10 @@ import { TeamService } from 'src/team/team.service';
 
 @Injectable()
 export class AuthService {
+    private readonly blacklistedTokens: Set<string> = new Set();
+
     constructor(
+        // private userService: UsersService | null,
         private userService : UsersService,
         private teamService : TeamService,
         private jwtService : JwtService,
@@ -50,6 +53,8 @@ export class AuthService {
             Object.assign(authLoginDto, {email: null});
         }
         const { email, username, password} = authLoginDto;
+
+        console.log({ email, username, password})
 
         // validate By Email
         if (username == null){
@@ -132,7 +137,17 @@ export class AuthService {
                 throw new UnauthorizedException('Token Invalid')
             }
             console.log(info)
-            const teamObj = await this.privilegeService.findTeamByUser(info.user_id);
+            let teamObjBefore = await this.privilegeService.findTeamByUser(info.user_id);
+
+            let teamObj = []
+
+            // not get offline team
+            for(let i=0;i<teamObjBefore.length;i++){
+                const team = await this.teamService.TeamfindById(teamObjBefore[i].team_id)
+                if(team.team_status != 'Offline'){
+                    teamObj.push(teamObjBefore[i])
+                }
+            }
             
             // console.log(teamObj);
 
@@ -188,13 +203,27 @@ export class AuthService {
 
 
     // logout
-    async logout(@Res() response: Response){
-        response.clearCookie('jwt-auth');
+    async logout(@Res() response: Response, access_token: string): Promise<any> {
+        // Add the token to the blacklist
+        // this.blacklistedTokens.add(access_token);
+        console.log(access_token)
 
+        const user_id = await this.getUserByToken(access_token);
+    
+        // Clear the cookie on the client side
+        response.clearCookie('jwt-auth');
+    
         console.log('log out');
 
-        return{
-            messsage: 'logout_success'
+        if(user_id!=null){
+             return {
+          status: '200 OK',
+        };
         }
-    }
+        else{
+            return '401 Unauthenticated'
+        }
+    
+       
+      }
 }

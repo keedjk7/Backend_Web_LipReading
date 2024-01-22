@@ -10,4 +10,7 @@ export class Managment_team{
 
     change_role:string
 
+    // new
+    status:string
+
 }

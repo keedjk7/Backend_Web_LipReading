@@ -17,9 +17,14 @@ import { UserWorkspaceModule } from './user_workspace/user_workspace.module';
 import { PostModule } from './post/post.module';
 import { TeamPostPageModule } from './team_post_page/team_post_page.module';
 import { Posts } from './post/posts.entity';
+import { ProfileModule } from './profile/profile.module';
+import { FileHandleModule } from './file-handle/file-handle.module';
+import { NotificationModule } from './notification/notification.module';
+import { Notification } from './notification/notification.entity';
+import { WebAdminModule } from './web-admin/web-admin.module';
 
 require("dotenv").config();
-const entities = [User,Video,Team,Privilege,Posts]
+const entities = [User,Video,Team,Privilege,Posts,Notification]
 
 @Module({
   imports: [
@@ -27,18 +32,18 @@ const entities = [User,Video,Team,Privilege,Posts]
       isGlobal: true
     }),
     TypeOrmModule.forRoot({
-      // // local
-      // type : process.env.DB_TYPE as 'mysql',
-      // // type : 'mysql',
-      // host : process.env.DB_HOST,
-      // port : parseInt(process.env.DB_PORT),
-      // username : process.env.DB_USER,
-      // // password: process.env.DB_PASSWORD,
-      // // password: null,
+      // local
+      type : process.env.DB_TYPE as 'mysql',
+      // type : 'mysql',
+      host : process.env.DB_HOST,
+      port : parseInt(process.env.DB_PORT),
+      username : process.env.DB_USER,
+      // password: process.env.DB_PASSWORD,
+      // password: null,
+      database : process.env.DB_NAME,
+      entities : entities,
+      synchronize : true,
       // database : process.env.DB_NAME,
-      // entities : entities,
-      // synchronize : true,
-      // // database : process.env.DB_NAME,
 
       // type: 'mysql',
       // host: 'mysql',
@@ -49,16 +54,16 @@ const entities = [User,Video,Team,Privilege,Posts]
       // entities: entities,
       // synchronize: true,
 
-       // server
-      type: 'mysql',
-      // host: 'host.docker.internal', // Use the actual IP address of the MySQL container
-      port: 3306,
-      host: process.env.DB_HOST,
-      username: 'root',
-      password: 'temppwd1234',
-      database: 'back_lip',
-      entities: entities,
-      synchronize: false,
+      //  // server
+      // type: 'mysql',
+      // // host: 'host.docker.internal', // Use the actual IP address of the MySQL container
+      // port: 3306,
+      // host: process.env.DB_HOST,
+      // username: 'root',
+      // password: 'temppwd1234',
+      // database: 'back_lip',
+      // entities: entities,
+      // synchronize: false,
       
       // type : 'mysql',
       // host : 'localhost',
@@ -80,6 +85,10 @@ const entities = [User,Video,Team,Privilege,Posts]
     UserWorkspaceModule,
     PostModule,
     TeamPostPageModule,
+    ProfileModule,
+    FileHandleModule,
+    NotificationModule,
+    WebAdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

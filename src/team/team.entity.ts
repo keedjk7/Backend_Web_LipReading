@@ -1,4 +1,4 @@
-import { BaseEntity,Entity,PrimaryGeneratedColumn, Column, UpdateDateColumn} from "typeorm";
+import { BaseEntity,Entity,PrimaryGeneratedColumn, Column, CreateDateColumn} from "typeorm";
 
 @Entity( {name : "team"} )
 export class Team extends BaseEntity{
@@ -17,7 +17,7 @@ export class Team extends BaseEntity{
     @Column()
     picture_team:string
 
-    @UpdateDateColumn()
+    @CreateDateColumn()
     createAt : Date;
 
     @Column()

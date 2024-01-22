@@ -6,6 +6,8 @@ import { AuthModule } from 'src/auth/auth.module';
 import { UsersModule } from 'src/users/users.module';
 import { PostModule } from 'src/post/post.module';
 import { VideoModule } from 'src/video/video.module';
+import { FileHandleModule } from 'src/file-handle/file-handle.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
@@ -14,6 +16,7 @@ import { VideoModule } from 'src/video/video.module';
     forwardRef(()=>AuthModule),
     forwardRef(()=>PostModule),
     forwardRef(()=>VideoModule),
+    forwardRef(()=>FileHandleModule),
   ],
   controllers: [TeamController],
   providers: [TeamService],

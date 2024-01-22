@@ -132,8 +132,8 @@ export class PrivilegeService {
 
     }
 
-    // block permission
-    async block_permission(managment_team:Managment_team){
+    // Offline permission
+    async Offline_permission(managment_team:Managment_team){
 
         console.log(managment_team);
         // const{changer_id,changed_id} = managment_team;
@@ -153,7 +153,7 @@ export class PrivilegeService {
 
         let permission = false;
 
-        // 0 mean web_admin
+        // 0 mean WebAdmin
         if (changer_id == 0){
             permission = true
         }
@@ -164,7 +164,7 @@ export class PrivilegeService {
 
     }
 
-    // unblock user account
+    // unOffline user account
 
     // privilege permission
     async privilege_permission(changer_role,changed_role,event){
@@ -172,7 +172,7 @@ export class PrivilegeService {
         let permission = false;
         // role that can edit
         // web_admin can edit all
-        if (changer_role == 'web_admin'){
+        if (changer_role == 'WebAdmin'){
             permission = true;
         }
         // change_role and kick user
@@ -228,13 +228,14 @@ export class PrivilegeService {
     }
 
 
-    // find team by user
+    // find team that user in member
     async findTeamByUser(user_id: number) {
         console.log(user_id);
         return await Privilege.find({
             where: {
                 user_id:user_id,
                 post_id: 0,
+                team_id : Not(0)
             }
         });
     }
@@ -258,6 +259,16 @@ export class PrivilegeService {
                 post_id: 0,
             }
         });
+    }
+
+    async findOwnerInTeam(team_id: number){
+        return await Privilege.findOne({
+            where:{
+                team_id:team_id,
+                post_id : 0,
+                role: 'Owner'
+            }
+        })
     }
 
     async findPostByTeamId(team_id: number){

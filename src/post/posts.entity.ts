@@ -1,4 +1,4 @@
-import { BaseEntity,Entity,PrimaryGeneratedColumn, Column, UpdateDateColumn} from "typeorm";
+import { BaseEntity,Entity,PrimaryGeneratedColumn, Column, CreateDateColumn} from "typeorm";
 
 @Entity( {name : "post"} )
 export class Posts extends BaseEntity{
@@ -12,7 +12,7 @@ export class Posts extends BaseEntity{
     @Column()
     video_id:number
 
-    @UpdateDateColumn()
+    @CreateDateColumn()
     createAt:Date
 
 }

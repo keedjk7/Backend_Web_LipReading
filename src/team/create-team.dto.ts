@@ -10,7 +10,7 @@ export class CreateTeamDto{
 
     // picture_name : string;
 
-    picture_team_content:string;
+    // picture_team_content:string;
 
     member : { Email: string; Role: string }[];
 }

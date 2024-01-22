@@ -9,6 +9,7 @@ import { TeamService } from 'src/team/team.service';
 export class AuthController {
   constructor(private readonly authService: AuthService,private readonly teamService: TeamService) {}
 
+  // @UseGuards(JwtAuthGuard)
   @Post('login')
   async login(@Body() authLoginDto: AuthLoginDto, @Res({passthrough:true}) response:Response){
     console.log(authLoginDto);
@@ -16,12 +17,32 @@ export class AuthController {
     const token = await this.authService.login(authLoginDto);
     console.log(token)
     // set cookie
-    return this.authService.setCookie(response, token);
+    let return_obj = await this.authService.setCookie(response, token);
+
+    
+    const user_id = await this.authService.checkToken_get_user(return_obj.access_token)
+    console.log(user_id)
+    // user blcok (Offline)
+    if(user_id.account_status == 'Offline'){
+      return {
+        status : '503 : Service unavailable'
+      }
+    }
+    // user active (Online)
+    else{
+      // check if webadmin set status '200 OK WebAdmin'
+      if(user_id.id == 0){
+        return_obj.status = '200 OK WebAdmin'
+      }
+
+      return return_obj
+    }
+    
   }
 
   @Post('logout')
-  logout(@Res({passthrough:true}) response:Response){
-    return this.authService.logout(response);
+  logout(@Res({passthrough:true}) response:Response,@Body() token){
+    return this.authService.logout(response,token.access_token);
   }
 
   @Post('check_token_user')
@@ -35,13 +56,17 @@ export class AuthController {
     console.log(token);
     try {
       const merge_data = await this.authService.checkToken_get_team(token.access_token);
+
+      console.log(merge_data)
   
       // Iterate through each team object in merge_data and convert picture_team to base64
       const updatedMergeData = await Promise.all(merge_data.map(async (teamObj) => {
         try {
-          const base64String = await this.teamService.imageToBase64(teamObj.picture_team);
-          console.log(base64String)
-          return { ...teamObj, picture_team: base64String };
+          // // base 64
+          // const base64String = await this.teamService.imageToBase64(teamObj.picture_team);
+          // console.log(base64String)
+          // return { ...teamObj, picture_team: base64String };
+          return teamObj;
         } catch (error) {
           // Handle errors during conversion for individual team objects
           console.error(`Error converting picture for team ${teamObj.team_name}: ${error.message}`);

@@ -1,4 +1,4 @@
-import { BaseEntity,Entity,PrimaryGeneratedColumn, Column, UpdateDateColumn} from "typeorm";
+import { BaseEntity,Entity,PrimaryGeneratedColumn, Column, CreateDateColumn} from "typeorm";
 
 @Entity( {name : "privilege"} )
 export class Privilege extends BaseEntity{
@@ -16,5 +16,9 @@ export class Privilege extends BaseEntity{
 
     @Column()
     post_id:number
+
+    @CreateDateColumn()
+    createDate:Date
+
 
 }

@@ -35,47 +35,47 @@ export class PrivilegeController {
     return this.privilegeService.kick_member_team(managment_team);
   }
 
-  @Post('block_user_account')
-  async block_user_account(@Body() managment_team:Managment_team){
-    const result = await this.privilegeService.block_permission(managment_team);
+  @Post('Offline_user_account')
+  async Offline_user_account(@Body() managment_team:Managment_team){
+    const result = await this.privilegeService.Offline_permission(managment_team);
     if (result.permission == true){
-      return this.userService.block_user(result.changed_id)
+      return this.userService.Offline_user(result.changed_id)
     }
     else{
       return "403 Forbidden"
     }
   }
 
-  @Post('active_user_account')
-  async active_user_account(@Body() managment_team:Managment_team){
-    const result = await this.privilegeService.block_permission(managment_team);
+  @Post('Online_user_account')
+  async Online_user_account(@Body() managment_team:Managment_team){
+    const result = await this.privilegeService.Offline_permission(managment_team);
     if (result.permission == true){
-      return this.userService.active_user(result.changed_id)
+      return this.userService.Online_user(result.changed_id)
     }
     else{
       return "403 Forbidden"
     }
   }
 
-  @Post('block_team')
-  async block_team(@Body() managment_team:Managment_team){
-    const result = await this.privilegeService.block_permission(managment_team);
+  @Post('Offline_team')
+  async Offline_team(@Body() managment_team:Managment_team){
+    const result = await this.privilegeService.Offline_permission(managment_team);
     if (result.permission == true){
-      return this.teamService.block_team(result.changed_id)
+      return this.teamService.Offline_team(result.changed_id)
     }
     else{
-      return "You don't have permission to block user Account"
+      return "You don't have permission to Offline user Account"
     }
   }
 
-  @Post('active_team')
-  async active_team(@Body() managment_team:Managment_team){
-    const result = await this.privilegeService.block_permission(managment_team);
+  @Post('Online_team')
+  async Online_team(@Body() managment_team:Managment_team){
+    const result = await this.privilegeService.Offline_permission(managment_team);
     if (result.permission == true){
-      return this.teamService.active_team(result.changed_id)
+      return this.teamService.Online_team(result.changed_id)
     }
     else{
-      return "You don't have permission to active user Account"
+      return "You don't have permission to Online user Account"
     }
   }
 

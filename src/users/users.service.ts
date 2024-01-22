@@ -4,136 +4,167 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './create-user.dto';
 import { User } from './user.entity';
 import { AuthService } from 'src/auth/auth.service';
+import { EditProfileDto } from 'src/profile/edit-profile.dto';
 
 @Injectable()
 export class UsersService {
+    constructor(
+        @InjectRepository(User)
+        private userRepository: Repository<User>,
+        // private authService: AuthService,
+      ) { }
     // constructor(
     //     private authService : AuthService,
     // ){}
 
     // create user
-    async create(createUserDto: CreateUserDto){
+    async create(createUserDto: CreateUserDto) {
         try {
             console.log(createUserDto);
-    
+
             const userWithSameEmail = await User.findOne({ where: { email: createUserDto.email } })
             const userWithSameUsername = await User.findOne({ where: { username: createUserDto.username } })
 
-            if(userWithSameEmail && userWithSameUsername){
+            if (userWithSameEmail && userWithSameUsername) {
                 return '200 UEE'
             }
 
             if (userWithSameEmail) {
                 return '200 EE'
             }
-    
+
             if (userWithSameUsername) {
-                return  '200 UE'
+                return '200 UE'
             }
-    
+
             const user = User.create({
                 ...createUserDto,
                 birthday: new Date(createUserDto.birthday),
-                account_status:'active'
+                account_status: 'Online'
             });
-    
+
             await user.save();
-    
+
             delete user.password;
-    
-            return '200 OK' 
+
+            return '200 OK'
         } catch (error) {
             throw error;
         }
     }
 
-    // block user account
-    async block_user(change_account_id){
+    // Offline user account
+    async Offline_user(change_account_id) {
 
-        try{
-            const block_user = await this.findById(change_account_id);
-            if (block_user.account_status == 'active'){
-                 block_user.account_status = 'block';
-                await User.update( block_user.id,block_user);
+        try {
+            const Offline_user = await this.findById(change_account_id);
+            if (Offline_user.account_status == 'Online') {
+                Offline_user.account_status = 'Offline';
+                await User.update(Offline_user.id, Offline_user);
 
                 return '200 OK';
             }
-            else{
+            else {
                 return '409 Conflict'
             }
-           
+
         }
-        catch (error){
+        catch (error) {
             // return 'not found this account';
             throw error;
         }
     }
 
-    // active user account
-    async active_user(change_account_id){
+    // Online user account
+    async Online_user(change_account_id) {
 
-        try{
-            const activek_user = await this.findById(change_account_id);
-            if (activek_user.account_status == 'block'){
-                activek_user.account_status = 'active';
-                await User.update( activek_user.id,activek_user);
+        try {
+            const Onlinek_user = await this.findById(change_account_id);
+            if (Onlinek_user.account_status == 'Offline') {
+                Onlinek_user.account_status = 'Online';
+                await User.update(Onlinek_user.id, Onlinek_user);
 
-                return 'active user success';
+                return 'Online user success';
             }
-            else{
-                return 'this account has already active'
+            else {
+                return 'this account has already Online'
             }
-           
+
         }
-        catch (error){
+        catch (error) {
             // return 'not found this account';
             throw error;
         }
     }
+    async new_password(user_id:number,new_password:string){
+        // console.log(token.access_token);
+
+        // old user data
+        let change_data = await this.findById(user_id)
+        // console.log(change_data)
+
+        // password
+        if (new_password != undefined){
+            change_data.password = new_password;
+        }
 
 
-        // console.log(createUserDto);
-        // // // const user = User.create(createUserDto);
-        // // // // แปลง bithday
-        // // const test = createUserDto.birthday;
-        // // console.log(test);
-        // // const test_date = new Date(test);
-        // // console.log('test',test_date);
+        console.log('new_password',change_data)
+        await User.update(user_id,change_data);
 
-        // // const birthdayDate = new Date(createUserDto.birthday);
-        // // console.log(birthdayDate);
-        // // user.birthday = birthdayDate;
-        // const user = User.create({
-        //     ...createUserDto,
-        //     birthday: new Date(createUserDto.birthday), // แปลงเป็น Date
-        // });
-        // await user.save();
+        return '200 OK'
 
-        // delete user.password;
-        // return {
-        //     status: '200 OK'
-        // };
-        
+    }
+
+    async delete_account(user_id:number){
+        this.userRepository.delete(user_id);
+
+        return '200 OK'
+    }
+
+
+    // console.log(createUserDto);
+    // // // const user = User.create(createUserDto);
+    // // // // แปลง bithday
+    // // const test = createUserDto.birthday;
+    // // console.log(test);
+    // // const test_date = new Date(test);
+    // // console.log('test',test_date);
+
+    // // const birthdayDate = new Date(createUserDto.birthday);
+    // // console.log(birthdayDate);
+    // // user.birthday = birthdayDate;
+    // const user = User.create({
+    //     ...createUserDto,
+    //     birthday: new Date(createUserDto.birthday), // แปลงเป็น Date
+    // });
+    // await user.save();
+
+    // delete user.password;
+    // return {
+    //     status: '200 OK'
+    // };
+
     // check user in data by Email
-    async checkEmailUser(email: string){
+    async checkEmailUser(email: string) {
         const user = await this.findByEmail(email);
         console.log(user);
-        if (user != null){
+        if (user != null) {
             return 'Found Account'
         }
-        else{
+        else {
             return 'Not Found Account'
         }
     }
 
     // check user in data by Username
-    async checkUsernameUser(username: string){
+    async checkUsernameUser(username: string) {
         const user = await this.findByUsername(username);
         console.log(user);
-        if (user != null){
+        if (user != null) {
             return 'Found Account'
         }
-        else{
+        else {
             return 'Not Found Account'
         }
     }
@@ -147,7 +178,7 @@ export class UsersService {
     //           .orWhere('user.surname LIKE :searchText', { searchText: `%${text}%` })
     //           .orWhere('user.lastname LIKE :searchText', { searchText: `%${text}%` })
     //           .getMany();
-      
+
     //         return users;
     //       } catch (error) {
     //         console.error('Error occurred while searching users:', error);
@@ -156,7 +187,7 @@ export class UsersService {
     // }
 
 
-    async showById(id: number):Promise<User>{
+    async showById(id: number): Promise<User> {
         const user = await this.findById(id);
 
         delete user.password;
@@ -166,25 +197,29 @@ export class UsersService {
     async findById(id: number) {
         return await User.findOne({
             where: {
-                id:id
+                id: id
             }
         });
     }
 
-    async findByEmail(email: string){
+    async findByEmail(email: string) {
         console.log(email)
         return await User.findOne({
             where: {
-                email:email
+                email: email
             }
         })
     }
 
-    async findByUsername(username: string){
+    async findByUsername(username: string) {
         return await User.findOne({
             where: {
-                username:username
+                username: username
             }
         })
+    }
+
+    async getAllUser(){
+        return await User.find();
     }
 }
