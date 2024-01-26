@@ -12,6 +12,7 @@ import * as fs from 'fs';
 import axios from 'axios';
 import * as archiver from 'archiver';
 import { Video } from './video.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 
 @Controller('video')
@@ -75,7 +76,10 @@ export class VideoController {
     const formData = new FormData();
     const fileStream = fs.createReadStream(file.path);
 
-    formData.append('file', fileStream, { filename: file.originalname });
+    // unqiue filename
+    const uniqueVideoName = uuidv4();
+
+    formData.append('file', fileStream, { filename: uniqueVideoName + '_' + file.originalname });
 
     // process lip reading
 

@@ -22,6 +22,9 @@ export class WebAdminService {
         if(user.id == 0){
             return "WebAdmin"
         }
+        else{
+            return "User"
+        }
     }
 
     async getAllUserInfo(access_token:string){
