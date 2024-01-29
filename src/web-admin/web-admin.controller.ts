@@ -34,9 +34,9 @@ export class WebAdminController {
 
   @Post('check-web-admin')
   async check_web_admin(@Body() token){
-    const user = await this.webAdminService.checkWebAdmin(token.access_token)
+    const role = await this.webAdminService.checkWebAdmin(token.access_token)
 
-    if(user == 'WebAdmin'){
+    if(role == 'WebAdmin'){
       return '200 OK WebAdmin'
     }
     else{
