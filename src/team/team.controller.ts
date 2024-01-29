@@ -61,7 +61,7 @@ export class TeamController {
   @Post('create')
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
-      destination: '../assets/picture_team/',
+      destination: process.env.team_image,
       filename: (req, file, cb) => {
         const randomName = Array(32)
           .fill(null)
@@ -197,7 +197,7 @@ export class TeamController {
   @Post('saveTeamInfo')
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
-      destination: './assets/picture_team/',
+      destination: process.env.team_image,
       filename: (req, file, cb) => {
         const randomName = Array(32)
           .fill(null)

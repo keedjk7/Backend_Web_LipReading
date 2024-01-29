@@ -17,17 +17,20 @@ export class UserWorkspaceService {
         // get user_id by token
         const user_id = await this.authService.getUserByToken(access_token);
 
-        console.log(user_id)
+        console.log(user_id,'OK')
 
         // team
         // get team_id by user_id
         const teams = await this.privilegeService.findTeamByUser(user_id);
+        
+        console.log('teams',teams)
 
         // get team_info by team_id
         const teams_info = [];
         for(let i = 0; i < teams.length; i++){
             const info = await this.teamService.TeamfindById(teams[i].team_id);
 
+            console.log(info)
             // get Only Team Online
             if(info.team_status == 'Online'){
                 // // Replace image content

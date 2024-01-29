@@ -32,4 +32,17 @@ export class WebAdminController {
     return this.webAdminService.editStatusTeam(body)
   }
 
+  @Post('check-web-admin')
+  async check_web_admin(@Body() token){
+    const role = await this.webAdminService.checkWebAdmin(token.access_token)
+
+    if(role == 'WebAdmin'){
+      return '200 OK WebAdmin'
+    }
+    else{
+      return '200 OK User'
+    }
+  }
+
+
 }
