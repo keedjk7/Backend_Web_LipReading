@@ -10,7 +10,7 @@ async function bootstrap() {
 
   // Enable CORS with the defined options
   app.enableCors({
-    origin: ['http://161.246.5.159:7777', 'http://localhost:3000'],
+    origin: ['http://161.246.5.159:7777','http://161.246.5.159:7779','http://localhost:3000','http://localhost:3001'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials:true
   });
@@ -18,5 +18,9 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(bodyParser.json({limit:'500mb'}))
   await app.listen(3000);
+  
+  process.on('uncaughtException', function (err) {
+    console.log(err);
+  });
 }
 bootstrap();

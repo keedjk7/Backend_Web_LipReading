@@ -53,7 +53,7 @@ import { UserWorkspaceModule } from 'src/user_workspace/user_workspace.module';
       useFactory: async (configService: ConfigService) => ({
         global: true,
         secret: '${process.env.JWT_SECRET}',
-        signOptions: { expiresIn: '2h' },
+        // signOptions: { expiresIn: '2h' },
       }),
       inject: [ConfigService],
     }),

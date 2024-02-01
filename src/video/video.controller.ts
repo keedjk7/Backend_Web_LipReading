@@ -59,7 +59,19 @@ export class VideoController {
 
   // new upload
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  // @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: process.env.origin_video,
+      filename: (req, file, cb) => {
+        const randomName = Array(32)
+          .fill(null)
+          .map(() => Math.round(Math.random() * 16).toString(16))
+          .join('');
+        return cb(null, `${randomName}${extname(file.originalname)}`);
+      },
+    }),
+  }))
   async uploadFile(@UploadedFile() file: Express.Multer.File, @Body() createVideoDto: CreateVideoDto) {
     console.log(createVideoDto.access_token)
     console.log(file)
