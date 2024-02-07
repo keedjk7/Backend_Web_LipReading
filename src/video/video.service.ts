@@ -19,7 +19,7 @@ export class VideoService {
 
 
   // upload 
-  async create(history_obj: HistoryObj, createVideoDto: CreateVideoDto, user_id: number) {
+  async create(history_obj: HistoryObj, user_id: number) {
 
     const history_video = Video.create({
       user_create: user_id,
