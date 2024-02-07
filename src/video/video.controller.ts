@@ -10,7 +10,6 @@ import { extname } from 'path';
 import * as FormData from 'form-data';
 import * as fs from 'fs';
 import axios from 'axios';
-import * as archiver from 'archiver';
 import { Video } from './video.entity';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -61,7 +60,19 @@ export class VideoController {
 
   // new upload
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  // @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: process.env.origin_video,
+      filename: (req, file, cb) => {
+        const randomName = Array(32)
+          .fill(null)
+          .map(() => Math.round(Math.random() * 16).toString(16))
+          .join('');
+        return cb(null, `${randomName}${extname(file.originalname)}`);
+      },
+    }),
+  }))
   async uploadFile(@UploadedFile() file: Express.Multer.File, @Body() createVideoDto: CreateVideoDto) {
     console.log(createVideoDto.access_token)
     console.log(file)
@@ -81,6 +92,7 @@ export class VideoController {
 
     formData.append('file', fileStream, { filename: uniqueVideoName + '_' + file.originalname });
 
+    console.log(process.env.new_lip_reading,'\n',formData)
     // process lip reading
 
     const response = await axios.post(process.env.new_lip_reading, formData, {
@@ -109,25 +121,30 @@ export class VideoController {
     }
   }
 
-  // upload other solution form-data
+  // // upload other solution form-data
+  // @Post('test')
+  // @UseInterceptors(FileInterceptor('file', {
+  //   storage: diskStorage({
+  //     destination: './src/test',
+  //     filename: (req, file, cb) => {
+  //       const randomName = Array(32)
+  //         .fill(null)
+  //         .map(() => Math.round(Math.random() * 16).toString(16))
+  //         .join('');
+  //       return cb(null, `${randomName}${extname(file.originalname)}`);
+  //     },
+  //   }),
+  // }))
+  // async test(@Body() textData, @UploadedFile() file: Express.Multer.File) {
+  //   console.log('Access Token:', textData.access_token);
+  //   console.log('Access Token:', textData.list);
+  //   console.log('Uploaded file:', file);
+  //   return { message: 'Data received successfully', textData, filename: file.filename };
+  // }
+
   @Post('test')
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: './src/test',
-      filename: (req, file, cb) => {
-        const randomName = Array(32)
-          .fill(null)
-          .map(() => Math.round(Math.random() * 16).toString(16))
-          .join('');
-        return cb(null, `${randomName}${extname(file.originalname)}`);
-      },
-    }),
-  }))
-  async test(@Body() textData, @UploadedFile() file: Express.Multer.File) {
-    console.log('Access Token:', textData.access_token);
-    console.log('Access Token:', textData.list);
-    console.log('Uploaded file:', file);
-    return { message: 'Data received successfully', textData, filename: file.filename };
+  async test(){
+    const response = await axios.post('http://161.246.5.151:7779/test');
   }
   
 
@@ -171,69 +188,69 @@ export class VideoController {
     // have token (user_account)
   }
 
-  // new download
-  @Post('new_download')
-  async downloadFile(@Body() downloadVideoDto: DownloadVideoDto, @Res() res: Response) {
-    try {
-      console.log("new", downloadVideoDto)
+  // // new download
+  // @Post('new_download')
+  // async downloadFile(@Body() downloadVideoDto: DownloadVideoDto, @Res() res: Response) {
+  //   try {
+  //     console.log("new", downloadVideoDto)
 
-      // not have token (anonymous)
-      if (downloadVideoDto.access_token === undefined) {
-        console.log('donwload case anonymous')
-        return this.videoService.new_download(downloadVideoDto.video_id, 0)
-      }
-      // have token (user_account)
-      else {
-        console.log('donwload case user')
-        const user_id = await this.authService.getUserByToken(downloadVideoDto.access_token);
-        console.log('user_id', user_id);
-        const response = await this.videoService.new_download(downloadVideoDto.video_id, user_id)
+  //     // not have token (anonymous)
+  //     if (downloadVideoDto.access_token === undefined) {
+  //       console.log('donwload case anonymous')
+  //       return this.videoService.new_download(downloadVideoDto.video_id, 0)
+  //     }
+  //     // have token (user_account)
+  //     else {
+  //       console.log('donwload case user')
+  //       const user_id = await this.authService.getUserByToken(downloadVideoDto.access_token);
+  //       console.log('user_id', user_id);
+  //       const response = await this.videoService.new_download(downloadVideoDto.video_id, user_id)
 
-        console.log(response)
-        // set Path for each file
-        let temp_path = response.merge_path
-        temp_path = temp_path.replace(/^\./, ''); // ตัด . ด้านหน้าสุดออก
-        const ProductFilePath = process.env.path_ml + temp_path
-        temp_path = response.sub_path
-        temp_path = temp_path.replace(/^\./, ''); // ตัด . ด้านหน้าสุดออก
-        const SubtitleFilePath = process.env.path_ml + temp_path
+  //       console.log(response)
+  //       // set Path for each file
+  //       let temp_path = response.merge_path
+  //       temp_path = temp_path.replace(/^\./, ''); // ตัด . ด้านหน้าสุดออก
+  //       const ProductFilePath = process.env.path_ml + temp_path
+  //       temp_path = response.sub_path
+  //       temp_path = temp_path.replace(/^\./, ''); // ตัด . ด้านหน้าสุดออก
+  //       const SubtitleFilePath = process.env.path_ml + temp_path
 
-        console.log('ProductFilePath:', ProductFilePath);
-        console.log('SubtitleFilePath:', SubtitleFilePath);
+  //       console.log('ProductFilePath:', ProductFilePath);
+  //       console.log('SubtitleFilePath:', SubtitleFilePath);
 
-        const video = await Video.findOne({ where: { video_id: downloadVideoDto.video_id } })
-        // get name of each file from databse
+  //       const video = await Video.findOne({ where: { video_id: downloadVideoDto.video_id } })
+  //       // get name of each file from databse
 
-        const ProductFileName = 'embeded_' + video.video_name
-        const SubtitleFileName = 'subtitle_' + video.video_name
+  //       const ProductFileName = 'embeded_' + video.video_name
+  //       const SubtitleFileName = 'subtitle_' + video.video_name
 
-        // res.json({ text: 'hello' });
+  //       // res.json({ text: 'hello' });
 
-        res.setHeader('Content-Type', 'application/zip');
-        res.setHeader('Content-Disposition', 'attachment; filename=lip_reading.zip');
-        // fileStream.pipe(res);
-        const archive = archiver('zip', {
-          zlib: { level: 9 } // Set compression level
-        });
+  //       res.setHeader('Content-Type', 'application/zip');
+  //       res.setHeader('Content-Disposition', 'attachment; filename=lip_reading.zip');
+  //       // fileStream.pipe(res);
+  //       const archive = archiver('zip', {
+  //         zlib: { level: 9 } // Set compression level
+  //       });
 
-        // Pipe the zip file to the response
-        archive.pipe(res);
+  //       // Pipe the zip file to the response
+  //       archive.pipe(res);
 
-        // Append file 1
-        archive.append(fs.createReadStream(ProductFilePath), { name: ProductFileName });
+  //       // Append file 1
+  //       archive.append(fs.createReadStream(ProductFilePath), { name: ProductFileName });
 
-        // Append file 2
-        archive.append(fs.createReadStream(SubtitleFilePath), { name: SubtitleFileName });
+  //       // Append file 2
+  //       archive.append(fs.createReadStream(SubtitleFilePath), { name: SubtitleFileName });
 
-        // Finalize the archive and send the response
-        archive.finalize();
-      }
-    } catch (error) {
-      // Handle errors
-      console.error('Error:', error);
-      res.status(500).send('Internal Server Error');
-    }
-  };
+  //       // Finalize the archive and send the response
+  //       archive.finalize();
+  //     }
+  //   } catch (error) {
+  //     // Handle errors
+  //     console.error('Error:', error);
+  //     res.status(500).send('Internal Server Error');
+  //   }
+  // };
 
   @Post('new_download_subtitle')
   async new_download_subtitle(@Body() downloadVideoDto: DownloadVideoDto) {

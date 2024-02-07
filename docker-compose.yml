@@ -4,8 +4,19 @@ services:
     build:
       context: .
       dockerfile: dockerfile
+    volumes:
+      - /home/diplab/Desktop/Lip_reading_Project_Web/pooh:/files
+      # - pooh:/files/user_image
     ports: 
       - "3000:3000"
     environment:
       - DB_HOST=host.docker.internal
-    command: npm run start:dev
+    command: npm run start
+
+# volumes:
+#   pooh:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       device: /home/diplab/Desktop/Lip_reading_Project_Web/pooh
+#       o: bind

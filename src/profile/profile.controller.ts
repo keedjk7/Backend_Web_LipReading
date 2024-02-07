@@ -132,7 +132,7 @@ export class ProfileController {
   @Post('EditProfile')
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
-      destination: './user_profile_image/',
+      destination: process.env.user_profile_image,
       filename: (req, file, cb) => {
         const randomName = Array(32)
           .fill(null)

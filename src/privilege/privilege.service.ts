@@ -231,13 +231,16 @@ export class PrivilegeService {
     // find team that user in member
     async findTeamByUser(user_id: number) {
         console.log(user_id);
-        return await Privilege.find({
+        const team =  await Privilege.find({
             where: {
                 user_id:user_id,
                 post_id: 0,
                 team_id : Not(0)
             }
         });
+
+        console.log(team)
+        return team
     }
 
     // Find privilege by user and team
