@@ -6,7 +6,7 @@ import { CreateVideoDto } from './create-video.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { DownloadVideoDto } from './download-video.dto';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { basename, extname } from 'path';
 import * as FormData from 'form-data';
 import * as fs from 'fs';
 import axios from 'axios';
@@ -68,11 +68,15 @@ export class VideoController {
           .fill(null)
           .map(() => Math.round(Math.random() * 16).toString(16))
           .join('');
-        return cb(null, `${randomName}${extname(file.originalname)}`);
+        // return cb(null, `${randomName}${extname(file.originalname)}`);
+        const originalName = basename(file.originalname, extname(file.originalname));
+        const filename = `${originalName}_${randomName}${extname(file.originalname)}`;
+        return cb(null, filename);
       },
     }),
   }))
   async uploadFile(@UploadedFile() file: Express.Multer.File, @Body() createVideoDto: CreateVideoDto) {
+    console.log('upload')
     console.log(createVideoDto.access_token)
     console.log(file)
 
@@ -86,7 +90,7 @@ export class VideoController {
     const formData = new FormData();
     const fileStream = fs.createReadStream(file.path);
 
-    formData.append('file', fileStream, { filename: file.originalname });
+    formData.append('file', fileStream, { filename: file.filename });
 
     console.log(process.env.new_lip_reading,'\n',formData)
     // process lip reading

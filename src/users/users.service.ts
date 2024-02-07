@@ -40,7 +40,8 @@ export class UsersService {
             const user = User.create({
                 ...createUserDto,
                 birthday: new Date(createUserDto.birthday),
-                account_status: 'Online'
+                account_status: 'Online',
+                profile_image : process.env.user_profile_image_defult
             });
 
             await user.save();

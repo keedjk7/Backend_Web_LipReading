@@ -179,10 +179,11 @@ export class VideoService {
     const video = await Video.findOne({ where: { video_id: video_id } })
 
     console.log(video)
-    // lip reading
-    const response = await axios.post(process.env.new_Download, {
-      filename: video.video_name
-    });
+    // // lip reading
+    // const response = await axios.post(process.env.new_Download, {
+    //   filename: video.video_name
+    // });
+
     // return {
     //   content : response.data
     // };
@@ -201,8 +202,8 @@ export class VideoService {
           filename: video.video_name
         });
       }
-      console.log('before return', response.data)
-      return response;
+      console.log('before return', video)
+      return video;
     }
     // not same person
     else {
@@ -219,7 +220,7 @@ export class VideoService {
         return 'user_token and user create video not same person';
       }
       else {
-        return response.data;
+        return response;
       }
 
 
@@ -244,7 +245,7 @@ export class VideoService {
       // }
       if (response != null) {
         return {
-          "sub_path": response.data.sub_path
+          "sub_path": response.subtitle_path
         }
       }
 
@@ -270,9 +271,11 @@ export class VideoService {
       //     "merge_path": response.data.merge_path
       //   }
       // }
+      console.log('res',response)
       if (response != null) {
+        console.log('return')
         return {
-          "merge_path": response.data.merge_path
+          "merge_path": response.product_path
         }
       }
 
@@ -298,7 +301,7 @@ export class VideoService {
 
       if (response != null) {
         return {
-          "origin_path": response.data.origin_path
+          "origin_path": response.video_origin_path
         }
       }
 
