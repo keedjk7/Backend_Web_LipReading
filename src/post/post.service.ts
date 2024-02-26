@@ -119,4 +119,12 @@ export class PostService {
             }
         });
     }
+    
+    async findPostByVideoId(video_id:number){
+        return await Posts.findOne({
+            where: {
+                video_id:video_id
+            }
+        });
+    }
 }

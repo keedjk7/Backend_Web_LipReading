@@ -10,12 +10,18 @@ export class Video extends BaseEntity{
   
   @Column()
   video_name: string;
-  
+
+  @Column()
+  thumbnail_path : string
+
   @Column()
   video_origin_path: string;
   
   @Column()
   subtitle_path: string;
+
+  @Column()
+  sub_thai_path :string
   
   @Column()
   product_path: string;

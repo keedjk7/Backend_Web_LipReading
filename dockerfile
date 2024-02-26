@@ -19,4 +19,4 @@ EXPOSE 3000
 RUN npm run build
 
 # Command to start your application
-CMD ["npm", "run", "start:dev"]
+CMD ["npm", "run", "start"]

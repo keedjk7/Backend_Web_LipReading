@@ -187,7 +187,7 @@ export class TeamController {
     return {
       'status': '200 OK',
       'team_name': team_info.team_name,
-      'team_image': team_info.picture_team,
+      'team_image': team_info.picture_team.substring(team_info.picture_team.lastIndexOf('/')+1),
       'team_desc': team_info.team_description,
       'user_role': user_privilege.role
     }
@@ -254,6 +254,7 @@ export class TeamController {
         // delete old image
         const status = await this.fileHandleService.deleteFile(team.picture_team)
 
+        // return this.teamService.edit_save(edit_team_info, file.path.substring(file.path.lastIndexOf('/')+1))
         return this.teamService.edit_save(edit_team_info, file.path)
       }
       
@@ -263,22 +264,6 @@ export class TeamController {
     }
   }
 
-  // @Post('searchInTeam')
-  // async searchInTeam(@Body() getInfo){
-  //   // check username in team
-  //   console.info(getInfo)
-  //   const members =  await this.privilegeService.findMemberInTeam(getInfo.team_id)
-
-  //   try {
-  //     const users = await this.usersService.searchUsersByText(getInfo.textSearch);
-  //     return { users };
-  //   } catch (error) {
-  //     return { error: 'An error occurred while fetching users' };
-  //   }
-
-  //   return members;
-  // }
-
   // teamWebPage
   @Post('teamWebPage')
   async teamWebPage(@Body() info) {
@@ -286,7 +271,9 @@ export class TeamController {
     // get user_id from token
     const user_id = await this.authService.getUserByToken(info.access_token);
 
-    const user_info = await this.privilegeService.findPrivilegeByUserAndTeam(user_id, info.team_id);
+    const user_privilege = await this.privilegeService.findPrivilegeByUserAndTeam(user_id, info.team_id);
+
+    const user_info = await this.usersService.findById(user_id)
 
     //  get team info from team_id
     const team_info = await this.teamService.TeamfindById(info.team_id);
@@ -319,7 +306,7 @@ export class TeamController {
           // picture
           'team_name': info_loop.team_name,
           // 'image_content' : imageBase64
-          'image_path': info_loop.picture_team
+          'image_path': info_loop.picture_team.substring(info_loop.picture_team.lastIndexOf('/')+1)
         }
 
         teams_info.push(edit_info);
@@ -340,6 +327,8 @@ export class TeamController {
 
       // const fileBase64 = await this.teamService.imageToBase64(path);
       const user = (await this.usersService.findById(posts_privilege[i].user_id))
+      const post = await this.postService.findPostById(posts_info[i].post_id)
+      const video = await this.videoService.findFromId(post.video_id)
       console.log(user)
       const username = user.username
 
@@ -348,7 +337,7 @@ export class TeamController {
         'Post_user': username,
         'Post_id': posts_privilege[i].post_id,
         'Post_Date': info.createAt,
-        // 'Post_image' : fileBase64,
+        'thumbnail' : video.thumbnail_path.substring(video.thumbnail_path.lastIndexOf('/')+1),
         'Post_description': info.post_description
       }
 
@@ -359,13 +348,14 @@ export class TeamController {
     // merge all
     return {
       'user_id': user_id,
-      'role': user_info.role,
+      'role': user_privilege.role,
       'team_id': team_info.team_id,
       'team_name': team_info.team_name,
       'team_description': team_info.team_description,
-      'team_picture': team_info.picture_team,
+      'team_picture': team_info.picture_team.substring(team_info.picture_team.lastIndexOf('/')+1),
       'team_count_member': count_member,
       'teams': teams_info,
+      'user_profile': user_info.profile_image.substring(user_info.profile_image.lastIndexOf('/')+1),
       // แก้ post
       // 'posts' : posts_info
       'posts': posts_info

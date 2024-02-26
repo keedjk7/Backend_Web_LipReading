@@ -4,22 +4,23 @@ import { Privilege } from './privilege.entity';
 import { Managment_team } from './managment-team.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { UsersService } from 'src/users/users.service';
-import {Not } from 'typeorm';
+import { Not } from 'typeorm';
 
 @Injectable()
 export class PrivilegeService {
     constructor(
         // private authService : AuthService,
-        @Inject(forwardRef(() => AuthService)) private authService : AuthService,
-        private userService : UsersService
-    ){}
+        @Inject(forwardRef(() => AuthService)) private authService: AuthService,
+        private userService: UsersService
+    ) { }
     // add member to team
-    async add_privilege(createPrivilegeDto:CreatePrivilegeDto){
+    async add_privilege(createPrivilegeDto: CreatePrivilegeDto) {
         console.log(createPrivilegeDto);
 
-        const {team_id,  user_id, role, post_id} = createPrivilegeDto;
+        const { team_id, user_id, role, post_id } = createPrivilegeDto;
         // create
-        const privilege = Privilege.create({team_id: createPrivilegeDto.team_id,
+        const privilege = Privilege.create({
+            team_id: createPrivilegeDto.team_id,
             user_id: createPrivilegeDto.user_id,
             role: createPrivilegeDto.role,
             post_id: createPrivilegeDto.post_id,
@@ -30,18 +31,18 @@ export class PrivilegeService {
 
         console.log('save success')
 
-        return '200 OK' ;
+        return '200 OK';
     }
 
     // show all member and each role in team
-    async show_team_privilege(team_id){
+    async show_team_privilege(team_id) {
         const team_privilege = await this.findMemberInTeam(team_id);
         // console.log(team_privilege);
         return team_privilege;
     }
 
     // change role
-    async change_role(managment_team:Managment_team){
+    async change_role(managment_team: Managment_team) {
 
         // find changer_id by access_token
         const changer_id = await this.authService.getUserByToken(managment_team.access_token);
@@ -52,35 +53,96 @@ export class PrivilegeService {
         const changed_id = managment_team.changed_id
 
         // check changer and changed role if changer higher than changed
-        const changer_privilege = await this.findPrivilegeByUserAndTeam(changer_id,managment_team.team_id);
+        const changer_privilege = await this.findPrivilegeByUserAndTeam(changer_id, managment_team.team_id);
 
-        const changed_privilege = await this.findPrivilegeByUserAndTeam(changed_id,managment_team.team_id);
+        const changed_privilege = await this.findPrivilegeByUserAndTeam(changed_id, managment_team.team_id);
 
         // console.log(changer);
 
         // console.log(changed);
 
         // check role can permission
-        const permission = await this.privilege_permission(changer_privilege.role,changed_privilege.role,'change_role')
+        const permission = await this.privilege_permission(changer_privilege.role, changed_privilege.role, 'change_role')
         // don't have permission
-        if (permission == false){
+        if (permission == false) {
             return "403 Forbidden";
         }
         // change role
-        else{
+        else {
             console.log('update');
             // set role
             changed_privilege.role = managment_team.change_role;
-            
-            await Privilege.update(changed_privilege.privilege_id,changed_privilege);
+
+            await Privilege.update(changed_privilege.privilege_id, changed_privilege);
 
             return '200 OK';
         }
-        
+
+    }
+    // left team by myself
+    async user_left_team(access_token: string, team_id: number) {
+        const user_id = await this.authService.getUserByToken(access_token);
+        console.log('out team');
+
+        const ownerTeam_privillege = await this.findOwnerInTeam(team_id)
+
+        // user not owner team
+        if (ownerTeam_privillege.user_id != user_id) {
+            // find data privilege user in team to delete
+            const user_to_delete = await Privilege.find({
+                where: {
+                    team_id: team_id,
+                    user_id: user_id,
+                }
+            });
+            console.log(user_to_delete);
+
+            // seperate data id
+            const delete_id = user_to_delete.map(value => value.privilege_id);
+            console.log(delete_id);
+
+
+            // delete all data by privilege_id
+            for (let i = 0; i < delete_id.length; i++) {
+                console.log('delete', delete_id[i])
+                await Privilege.delete(delete_id[i]);
+            }
+
+            // await Privilege.delete(data_to_delete.privilege_id);
+
+            return '200 OK';
+        }
+        // user left owner team
+        else{
+            // find data privilege user in team to delete
+        const team_to_delete = await Privilege.find({
+            where: {
+                team_id: team_id,
+            }
+        });
+        console.log(team_to_delete);
+
+        // seperate data id
+        const delete_id = team_to_delete.map(value => value.privilege_id);
+        console.log(delete_id);
+
+
+        // delete all data by privilege_id
+        for (let i = 0; i < team_to_delete.length; i++){
+            console.log('delete',delete_id[i])
+            await Privilege.delete(delete_id[i]);
+         }
+
+        // await Privilege.delete(data_to_delete.privilege_id);
+
+        return '200 OK';
+        }
+
+
     }
 
     // kick account from team (delete on team id)
-    async kick_member_team(managment_team:Managment_team){
+    async kick_member_team(managment_team: Managment_team) {
 
         console.log(managment_team);
         // const{changer_id,changed_id,team_id} = managment_team;
@@ -93,18 +155,18 @@ export class PrivilegeService {
         // const changed_id = changed.id;
         const changed_id = managment_team.changed_id
 
-        const changer_privilege = await this.findPrivilegeByUserAndTeam(changer_id,managment_team.team_id);
+        const changer_privilege = await this.findPrivilegeByUserAndTeam(changer_id, managment_team.team_id);
 
-        const changed_privilege = await this.findPrivilegeByUserAndTeam(changed_id,managment_team.team_id);
+        const changed_privilege = await this.findPrivilegeByUserAndTeam(changed_id, managment_team.team_id);
 
         // check role can permission
-        const permission = await this.privilege_permission(changer_privilege.role,changed_privilege.role,'kick')
+        const permission = await this.privilege_permission(changer_privilege.role, changed_privilege.role, 'kick')
         // don't have permission
-        if (permission == false){
+        if (permission == false) {
             return "403 Forbidden";
         }
         // kick this account
-        else{
+        else {
             console.log('kick');
 
             // find data privilege user in team to delete
@@ -120,10 +182,10 @@ export class PrivilegeService {
             const delete_id = user_to_delete.map(value => value.privilege_id);
             console.log(delete_id);
             // delete all data by privilege_id
-            for (let i = 0; i < delete_id.length; i++){
-                console.log('delete',delete_id[i])
+            for (let i = 0; i < delete_id.length; i++) {
+                console.log('delete', delete_id[i])
                 await Privilege.delete(delete_id[i]);
-             }
+            }
 
             // await Privilege.delete(data_to_delete.privilege_id);
 
@@ -133,7 +195,7 @@ export class PrivilegeService {
     }
 
     // Offline permission
-    async Offline_permission(managment_team:Managment_team){
+    async Offline_permission(managment_team: Managment_team) {
 
         console.log(managment_team);
         // const{changer_id,changed_id} = managment_team;
@@ -149,63 +211,64 @@ export class PrivilegeService {
         //     changed_id = changed.id;
         // }
         changed_id = managment_team.changed_id
-        
+
 
         let permission = false;
 
         // 0 mean WebAdmin
-        if (changer_id == 0){
+        if (changer_id == 0) {
             permission = true
         }
 
-        return  {
-            "permission" : permission,
-            "changed_id" : changed_id};
+        return {
+            "permission": permission,
+            "changed_id": changed_id
+        };
 
     }
 
     // unOffline user account
 
     // privilege permission
-    async privilege_permission(changer_role,changed_role,event){
-        console.log(changer_role,changed_role,event);
+    async privilege_permission(changer_role, changed_role, event) {
+        console.log(changer_role, changed_role, event);
         let permission = false;
         // role that can edit
         // web_admin can edit all
-        if (changer_role == 'WebAdmin'){
+        if (changer_role == 'WebAdmin') {
             permission = true;
         }
         // change_role and kick user
-        else if (event == 'change_role'|| event == 'kick'){
+        else if (event == 'change_role' || event == 'kick') {
             // team_owner can edit team_admin and member
-            if (changer_role == 'Owner' && (changed_role == 'Admin'||changed_role == 'User')){
+            if (changer_role == 'Owner' && (changed_role == 'Admin' || changed_role == 'User')) {
                 permission = true;
             }
             // team_admin can edit member
-            else if (changer_role == 'Admin' && changed_role == 'User'){
+            else if (changer_role == 'Admin' && changed_role == 'User') {
                 permission = true;
             }
-            else{
+            else {
                 console.log('Fail to Change Role');
             }
         }
         // team_owner&&Admin can edit team 
-        else if((event == 'edit_team' || event == 'delete_team')&& (changer_role == 'Owner'||changer_role == 'Admin')){
+        else if ((event == 'edit_team' || event == 'delete_team') && (changer_role == 'Owner' || changer_role == 'Admin')) {
             permission = true;
         }
         // team_owner can delete team
-        else if(event == 'delete_team' && changer_role == 'Owner'){
+        else if (event == 'delete_team' && changer_role == 'Owner') {
             permission = true;
         }
         // Post_Owner can edit post
-        else if(event == 'edit_post' && changer_role == 'Post_Owner'){
+        else if (event == 'edit_post' && changer_role == 'Post_Owner') {
             permission = true;
         }
         // Post_Owner, team_owner, Admin can delete post
-        else if(event == 'delete_post' &&(changer_role == 'Owner' || changer_role == 'Admin' || changer_role == 'Post_Owner')){
+        else if (event == 'delete_post' && (changer_role == 'Owner' || changer_role == 'Admin' || changer_role == 'Post_Owner')) {
             permission = true;
         }
-        
+
         console.log(permission);
 
         return permission;
@@ -216,14 +279,14 @@ export class PrivilegeService {
         console.log(team_id);
         const team = await Privilege.find({
             where: {
-                team_id:team_id,
+                team_id: team_id,
                 post_id: 0,
             }
         });
 
         return {
-            "team_id":team_id,
-            "count_member":team.length
+            "team_id": team_id,
+            "count_member": team.length
         }
     }
 
@@ -231,11 +294,11 @@ export class PrivilegeService {
     // find team that user in member
     async findTeamByUser(user_id: number) {
         console.log(user_id);
-        const team =  await Privilege.find({
+        const team = await Privilege.find({
             where: {
-                user_id:user_id,
+                user_id: user_id,
                 post_id: 0,
-                team_id : Not(0)
+                team_id: Not(0)
             }
         });
 
@@ -246,11 +309,11 @@ export class PrivilegeService {
     // Find privilege by user and team
     async findPrivilegeByUserAndTeam(user_id: number, team_id: number) {
         return await Privilege.findOne({
-        where: {
-            user_id: user_id,
-            team_id: team_id,
-            post_id: 0, // Assuming post_id is also a criterion
-        },
+            where: {
+                user_id: user_id,
+                team_id: team_id,
+                post_id: 0, // Assuming post_id is also a criterion
+            },
         });
     }
 
@@ -258,32 +321,39 @@ export class PrivilegeService {
     async findMemberInTeam(team_id: number) {
         return await Privilege.find({
             where: {
-                team_id:team_id,
+                team_id: team_id,
                 post_id: 0,
             }
         });
     }
 
-    async findOwnerInTeam(team_id: number){
+    async findOwnerInTeam(team_id: number) {
         return await Privilege.findOne({
-            where:{
-                team_id:team_id,
-                post_id : 0,
+            where: {
+                team_id: team_id,
+                post_id: 0,
                 role: 'Owner'
             }
         })
     }
 
-    async findPostByTeamId(team_id: number){
+    async findPostByTeamId(team_id: number) {
         return await Privilege.find({
-            where:{
-                team_id:team_id,
+            where: {
+                team_id: team_id,
                 post_id: Not(0)
             }
         })
     }
-    
 
+    async findbyPostId_UserId(user_id: number, post_id: number) {
+        return await Privilege.findOne({
+            where: {
+                user_id: user_id,
+                post_id: post_id
+            }
+        })
+    }
 
     // // find by userId & team
     // async findRoleMemberInTeam(user_id: number, team_id: number) {
@@ -296,33 +366,33 @@ export class PrivilegeService {
     //     });
     // }
     // delete team privilege
-    async delete_team(team_id: number){
+    async delete_team(team_id: number) {
         // find all pri in this team
         const team_privilege = await Privilege.find({
             where: {
-                team_id:team_id,
+                team_id: team_id,
             }
         });
         // seperate data id
         const delete_ids = team_privilege.map(value => value.privilege_id);
         console.log(delete_ids);
         // delete all data by id
-        for (let i = 0; i < delete_ids.length; i++){
-            console.log('delete',delete_ids[i])
+        for (let i = 0; i < delete_ids.length; i++) {
+            console.log('delete', delete_ids[i])
             await Privilege.delete(delete_ids[i]);
-         }
+        }
     }
 
     // delet_post
-    async delete_post(post_id: number){
-        console.log('delete post privilege',post_id)
-         // find all pri in this team
-         const posts_privilege = await Privilege.findOne({
+    async delete_post(post_id: number) {
+        console.log('delete post privilege', post_id)
+        // find all pri in this team
+        const posts_privilege = await Privilege.findOne({
             where: {
-                post_id:post_id,
+                post_id: post_id,
             }
         });
-        
+
         await Privilege.delete(posts_privilege.privilege_id)
     }
 
