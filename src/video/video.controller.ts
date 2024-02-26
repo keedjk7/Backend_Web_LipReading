@@ -95,8 +95,11 @@ export class VideoController {
     formData.append('file', fileStream, { filename: file.filename });
 
     console.log(process.env.new_lip_reading,'\n',formData)
-    // process lip reading
 
+    // save new video without process
+    
+
+    // process lip reading
     const response = await axios.post(process.env.new_lip_reading, formData, {
       headers: formData.getHeaders(),
       maxRedirects: 0,
@@ -109,9 +112,10 @@ export class VideoController {
 
     const video_obj = response.data
 
+    // update after finish process
     if (createVideoDto.access_token === undefined) {
       console.log('undefined');
-      return this.videoService.create(video_obj, createVideoDto, 0);
+      return this.videoService.create(video_obj, 0);
     }
     // check have token (user account)
     else {
@@ -119,7 +123,7 @@ export class VideoController {
       // get user_id
       const user_id = await this.authService.getUserByToken(createVideoDto.access_token);
 
-      return this.videoService.create(video_obj, createVideoDto, user_id);
+      return this.videoService.create(video_obj, user_id);
     }
   }
 
