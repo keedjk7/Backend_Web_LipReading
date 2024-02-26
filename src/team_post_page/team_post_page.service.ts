@@ -16,11 +16,11 @@ export class TeamPostPageService {
         private videoService : VideoService
     ){}
     
-    async getTeamPostPage(teamPostPageDto:TeamPostPageDto){
+    async getTeamPostPage(teamPostPageDto: TeamPostPageDto) {
         //userid from token
         const user_id = await this.authService.getUserByToken(teamPostPageDto.access_token);
         // get Role from userid and team_id
-        const user_privilege_info = await this.privilegeService.findPrivilegeByUserAndTeam(user_id,teamPostPageDto.team_id);
+        const user_privilege_info = await this.privilegeService.findPrivilegeByUserAndTeam(user_id, teamPostPageDto.team_id);
         // get user info from user_id
         const user_info = await this.usersService.findById(user_id)
         // post info from post_id
@@ -41,16 +41,18 @@ export class TeamPostPageService {
         // console.log(base64Video)
 
         const data = {
-        role: user_privilege_info.role,
-        team_id: teamPostPageDto.team_id,
-        post_id: teamPostPageDto.post_id,
-        post_user: user_info.username,
-        post_date: post_info.createAt,
-        video_path: video.product_path,
-        video_id: video_id,
-        subtitle_eng: subtitle_eng,
-        subtitle_thai: subtitle_thai,
-        status : "200 OK"
+            role: user_privilege_info.role,
+            user_image: user_info.profile_image.substring(user_info.profile_image.lastIndexOf('/')+1),
+            team_id: teamPostPageDto.team_id,
+            post_id: teamPostPageDto.post_id,
+            post_user: user_info.username,
+            post_date: post_info.createAt,
+            post_description: post_info.post_description,
+            video_path: video.product_path.substring(video.product_path.lastIndexOf('/')+1),
+            video_id: video_id,
+            subtitle_eng: subtitle_eng,
+            subtitle_thai: subtitle_thai,
+            status: "200 OK"
         }
         console.log(data)
 

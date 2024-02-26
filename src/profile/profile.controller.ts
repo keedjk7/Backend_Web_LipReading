@@ -60,7 +60,7 @@ export class ProfileController {
         console.log(user);
 
         return {
-          profile_path: user.profile_image
+          profile_path: user.profile_image.substring(user.profile_image.lastIndexOf('/') + 1)
         }
 
       }
@@ -120,7 +120,7 @@ export class ProfileController {
 
       return {
         username: user.username,
-        profile_image_path: user.profile_image,
+        profile_image_path: user.profile_image.substring(user.profile_image.lastIndexOf('/')+1),
         email: user.email,
         birthdate: user.birthday,
         status: '200 OK'
@@ -177,6 +177,7 @@ export class ProfileController {
       // delete old image
       const delete_file_status = await this.fileHandleService.deleteFile(user.profile_image)
 
+      // return this.profileService.edit_save_user(editProfileDto, file.path.substring(file.path.lastIndexOf('/')+1),)
       return this.profileService.edit_save_user(editProfileDto, file.path)
     }
   }

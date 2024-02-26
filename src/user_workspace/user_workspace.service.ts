@@ -42,7 +42,7 @@ export class UserWorkspaceService {
                     'team_id': info.team_id,
                     'team_name': info.team_name,
                     // 'image_content': base64String
-                    'image_path' :info.picture_team
+                    'image_path' :info.picture_team.substring(info.picture_team.lastIndexOf('/')+1)
                 };
 
                 teams_info.push(modifiedTeamInfo);

@@ -9,7 +9,7 @@ export class CreateUserDto{
 
     username : string;
 
-    surname : string;
+    firstname : string;
 
     lastname : string;
 

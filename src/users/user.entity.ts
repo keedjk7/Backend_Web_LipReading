@@ -8,7 +8,7 @@ export class User extends BaseEntity{
 
     // surname & lastname
     @Column()
-    surname:string
+    firstname:string
 
     @Column()
     lastname:string
@@ -28,11 +28,11 @@ export class User extends BaseEntity{
     @Column()
     account_status : string
 
-    @Column()
-    wallet_path : string;
+    // @Column()
+    // wallet_path : string;
 
-    @Column()
-    own_space : string;
+    // @Column()
+    // own_space : string;
 
     @Column()
     profile_image : string

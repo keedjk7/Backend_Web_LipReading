@@ -108,6 +108,8 @@ export class AuthService {
             }
             // console.log(info)
             const user = await this.userService.findById(info.user_id);
+
+            user.profile_image = user.profile_image.substring(user.profile_image.lastIndexOf('/')+1)
         
             return user;
         }catch(e){
@@ -189,7 +191,7 @@ export class AuthService {
             const mergedData = teamsData.map((team, index) => ({
             team_id: team.team_id,
             team_name: team.team_name,
-            picture_team: team.picture_team,
+            picture_team: team.picture_team.substring(team.picture_team.lastIndexOf('/')+1),
             role: rolesData[index]?.role,
             count_member: memberCountData[index]?.count_member, // Adding count_member to mergedData
             }));

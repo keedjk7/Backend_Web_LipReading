@@ -30,6 +30,11 @@ export class PrivilegeController {
     return this.privilegeService.change_role(managment_team);
   }
 
+  @Post('UserleftTeam')
+  leftTeam(@Body() body){
+    return this.privilegeService.user_left_team(body.access_token,body.team_id);
+  }
+
   @Post('kick_user_from_team')
   kick_user_team(@Body() managment_team:Managment_team){
     return this.privilegeService.kick_member_team(managment_team);

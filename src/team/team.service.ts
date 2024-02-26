@@ -178,17 +178,17 @@ export class TeamService {
     }
 
     
-    async imageToBase64(filePath: string) {
-        try {
-          const imageBuffer = fs.readFileSync(filePath);
-          const base64String = imageBuffer.toString('base64');
-          const newbase64String = 'data:image/png;base64,' + base64String;
-          return newbase64String;
-        } catch (error) {
-          // Handle errors, such as file not found or permissions issues
-          throw new Error('Error converting image to base64: ' + error.message);
-        }
-    }
+    // async imageToBase64(filePath: string) {
+    //     try {
+    //       const imageBuffer = fs.readFileSync(filePath);
+    //       const base64String = imageBuffer.toString('base64');
+    //       const newbase64String = 'data:image/png;base64,' + base64String;
+    //       return newbase64String;
+    //     } catch (error) {
+    //       // Handle errors, such as file not found or permissions issues
+    //       throw new Error('Error converting image to base64: ' + error.message);
+    //     }
+    // }
 
     async getExtension(firstChar:string){
         let extension = null;
