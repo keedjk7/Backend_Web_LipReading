@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PostService } from 'src/post/post.service';
 import { PrivilegeService } from 'src/privilege/privilege.service';
+import * as srtToObj from 'srt-to-obj';
 
 require("dotenv").config();
 
@@ -25,13 +26,27 @@ export class VideoService {
   // upload 
   async create(history_obj: HistoryObj, user_id: number) {
 
+    console.log('save_video',{
+      user_create: user_id,
+      video_name: history_obj.video_name,
+      // thumbnail_path:history_obj.thumbnail_path,
+      thumbnail_path : '/files/thumbnail/' +  history_obj.video_name.substring(0, history_obj.video_name.indexOf('.')) + '.png',
+      video_origin_path: history_obj.video_origin_path,
+      subtitle_path: history_obj.subtitle_path,
+      // sub_thai_path: history_obj.sub_thai_path,
+      sub_thai_path:'/files/thai_subtitle/' +  history_obj.video_name.substring(0, history_obj.video_name.indexOf('.')) + '_sub_thai.txt',
+      product_path: history_obj.product_path
+    })
+
     const history_video = Video.create({
       user_create: user_id,
       video_name: history_obj.video_name,
-      thumbnail_path:history_obj.thumbnail_path,
+      // thumbnail_path:history_obj.thumbnail_path,
+      thumbnail_path: '/files/thumbnail/' +  history_obj.video_name.substring(0, history_obj.video_name.indexOf('.')) + '.png',
       video_origin_path: history_obj.video_origin_path,
       subtitle_path: history_obj.subtitle_path,
-      sub_thai_path: history_obj.sub_thai_path,
+      // sub_thai_path: history_obj.sub_thai_path,
+      sub_thai_path:'/files/thai_subtitle/' +  history_obj.video_name.substring(0, history_obj.video_name.indexOf('.')) + '_sub_thai.txt',
       product_path: history_obj.product_path
     });
 
@@ -45,121 +60,121 @@ export class VideoService {
 
   }
 
-  async get_contentBase64(video_id: number, user_id: number) {
-    // const response = await axios.get(process.env.URL_ML);
-    console.log('id', video_id)
-    // search by id
-    const video = await Video.findOne({ where: { video_id: video_id } })
+  // async get_contentBase64(video_id: number, user_id: number) {
+  //   // const response = await axios.get(process.env.URL_ML);
+  //   console.log('id', video_id)
+  //   // search by id
+  //   const video = await Video.findOne({ where: { video_id: video_id } })
 
 
-    console.log(video)
-    const response = await axios.post(process.env.URL_ML_Download, {
-      filename: video.video_name
-    });
-    // return {
-    //   content : response.data
-    // };
+  //   console.log(video)
+  //   const response = await axios.post(process.env.URL_ML_Download, {
+  //     filename: video.video_name
+  //   });
+  //   // return {
+  //   //   content : response.data
+  //   // };
 
-    //check user_token and user create video same person
-    if (video.user_create == user_id) {
-      // delete row in table if user_create = null (mean anonymous)
-      // console.log(video.user_create=='')
-      if (video.user_create == 0) {
-        this.historyRepository.delete(video_id);
+  //   //check user_token and user create video same person
+  //   if (video.user_create == user_id) {
+  //     // delete row in table if user_create = null (mean anonymous)
+  //     // console.log(video.user_create=='')
+  //     if (video.user_create == 0) {
+  //       this.historyRepository.delete(video_id);
 
-        // delete file 
-        await axios.post(process.env.URL_FILE_Delete, {
-          filename: video.video_name
-        });
-      }
-      return response;
-    }
-    // not same person
-    else {
-      return null;
-    }
-  }
+  //       // delete file 
+  //       await axios.post(process.env.URL_FILE_Delete, {
+  //         filename: video.video_name
+  //       });
+  //     }
+  //     return response;
+  //   }
+  //   // not same person
+  //   else {
+  //     return null;
+  //   }
+  // }
 
-  // download 
-  async download(video_id: number, user_id: number) {
-    try {
+  // // download 
+  // async download(video_id: number, user_id: number) {
+  //   try {
 
-      const response = await this.get_contentBase64(video_id, user_id)
+  //     const response = await this.get_contentBase64(video_id, user_id)
 
-      if (response == null) {
-        return 'user_token and user create video not same person';
-      }
-      else {
-        return response.data;
-      }
-
-
-    } catch (error) {
-      throw new Error(`Error calling API: ${error.message}`);
-    }
-  }
-
-  // download subtitle
-  async download_subtitle(video_id: number, user_id: number) {
-    try {
-
-      const response = await this.get_contentBase64(video_id, user_id)
-
-      if (response == null) {
-        return 'user_token and user create video not same person';
-      }
-      else {
-        return {
-          "subtitle_content": response.data.content_sub
-        }
-      }
+  //     if (response == null) {
+  //       return 'user_token and user create video not same person';
+  //     }
+  //     else {
+  //       return response.data;
+  //     }
 
 
-    } catch (error) {
-      throw new Error(`Error calling API: ${error.message}`);
-    }
-  }
+  //   } catch (error) {
+  //     throw new Error(`Error calling API: ${error.message}`);
+  //   }
+  // }
+
+  // // download subtitle
+  // async download_subtitle(video_id: number, user_id: number) {
+  //   try {
+
+  //     const response = await this.get_contentBase64(video_id, user_id)
+
+  //     if (response == null) {
+  //       return 'user_token and user create video not same person';
+  //     }
+  //     else {
+  //       return {
+  //         "subtitle_content": response.data.content_sub
+  //       }
+  //     }
 
 
-  // download video
-  async download_video(video_id: number, user_id: number) {
-    try {
-      const response = await this.get_contentBase64(video_id, user_id)
-
-      if (response == null) {
-        return 'user_token and user create video not same person';
-      }
-      else {
-        return {
-          "merge_video_content": response.data.content_merge
-        }
-      }
+  //   } catch (error) {
+  //     throw new Error(`Error calling API: ${error.message}`);
+  //   }
+  // }
 
 
-    } catch (error) {
-      throw new Error(`Error calling API: ${error.message}`);
-    }
-  }
+  // // download video
+  // async download_video(video_id: number, user_id: number) {
+  //   try {
+  //     const response = await this.get_contentBase64(video_id, user_id)
 
-  // download video origin old
-  async download_origin(video_id: number, user_id: number) {
-    try {
-      const response = await this.get_contentBase64(video_id, user_id)
-
-      if (response == null) {
-        return 'user_token and user create video not same person';
-      }
-      else {
-        return {
-          "origin_content": response.data.content_origin
-        }
-      }
+  //     if (response == null) {
+  //       return 'user_token and user create video not same person';
+  //     }
+  //     else {
+  //       return {
+  //         "merge_video_content": response.data.content_merge
+  //       }
+  //     }
 
 
-    } catch (error) {
-      throw new Error(`Error calling API: ${error.message}`);
-    }
-  }
+  //   } catch (error) {
+  //     throw new Error(`Error calling API: ${error.message}`);
+  //   }
+  // }
+
+  // // download video origin old
+  // async download_origin(video_id: number, user_id: number) {
+  //   try {
+  //     const response = await this.get_contentBase64(video_id, user_id)
+
+  //     if (response == null) {
+  //       return 'user_token and user create video not same person';
+  //     }
+  //     else {
+  //       return {
+  //         "origin_content": response.data.content_origin
+  //       }
+  //     }
+
+
+  //   } catch (error) {
+  //     throw new Error(`Error calling API: ${error.message}`);
+  //   }
+  // }
 
 
   // // convert file base64
@@ -207,10 +222,13 @@ export class VideoService {
         // await axios.post(process.env.URL_FILE_Delete, {
         //   filename: video.video_name
         // });
-        await fs.unlink(video.product_path);
-        await fs.unlink(video.thumbnail_path);
-        await fs.unlink(video.video_origin_path);
-        await fs.unlink(video.subtitle_path);
+        // Delay for 1 minutes
+        setTimeout(async () => {
+          await fs.unlink(video.product_path);
+          await fs.unlink(video.thumbnail_path);
+          await fs.unlink(video.video_origin_path);
+          await fs.unlink(video.subtitle_path);
+        }, 1 * 60 * 1000); // 1 minutes in milliseconds
       }
       console.log('before return', video)
       return video;
@@ -245,14 +263,6 @@ export class VideoService {
 
       const response = await this.getPath_Check(video_id, user_id)
 
-      // if (response == null) {
-      //   return 'user_token and user create video not same person';
-      // }
-      // else {
-      //   return {
-      //     "sub_path": response.data.sub_path
-      //   }
-      // }
       if (response != null) {
         return {
           "sub_path": response.subtitle_path.substring(response.subtitle_path.lastIndexOf('/')+1)
@@ -272,15 +282,6 @@ export class VideoService {
       console.log('new_download_video')
       const response = await this.getPath_Check(video_id, user_id)
 
-      // if (response == null) {
-      //   return 'user_token and user create video not same person';
-      // }
-      // else {
-      //   console.log(response)
-      //   return {
-      //     "merge_path": response.data.merge_path
-      //   }
-      // }
       console.log('res',response)
       if (response != null) {
         console.log('return')
@@ -299,15 +300,6 @@ export class VideoService {
   async new_download_origin(video_id: number, user_id: number) {
     try {
       const response = await this.getPath_Check(video_id, user_id)
-
-      // if (response == null) {
-      //   return 'user_token and user create video not same person';
-      // }
-      // else {
-      //   return {
-      //     "origin_path": response.data.origin_path
-      //   }
-      // }
 
       if (response != null) {
         return {
@@ -367,7 +359,7 @@ export class VideoService {
 
   // get frame subtitle eng
   async getVideoFrame(video_id: number) {
-    try {
+    // try {
       // const response = await axios.get(process.env.URL_ML);
       // // console.log(process.env.URL_ML)
       // console.log(createVideoDto.content)
@@ -382,62 +374,59 @@ export class VideoService {
       // });
       // console.log('res:', response.data;
       // return response.data
-      console.log(video.subtitle_path,video.subtitle_path)
-      const eng_sub = await this.readSrtFile(video.subtitle_path)
-      const thai_sub = await this.readSrtFile(video.sub_thai_path)
+      console.log(video.subtitle_path,video.sub_thai_path)
+      // const eng_sub = await this.readSrtFile(video.subtitle_path)
+      const eng_sub = srtToObj(video.subtitle_path).then(async srtData => {
+        // console.log(srtData)
+        return await srtData
+      })
+      const thai_sub = await this.readTextFile(video.sub_thai_path)
 
+      console.log('eng_sub',await eng_sub)
+      console.log('thai_sub',thai_sub)
 
-      const sub_eng = eng_sub.map(item => ({
-        start: item.start.replace(',', '.').substring(0, 12),
-        end: item.end.replace(',', '.').substring(0, 12),
-        message: item.text?.trim() || '', // Use optional chaining and provide a default value
-      }));
+      // const sub_eng = eng_sub.map(item => ({
+      //   start: item.start.replace(',', '.').substring(0, 12),
+      //   end: item.end.replace(',', '.').substring(0, 12),
+      //   message: item.text?.trim() || '', // Use optional chaining and provide a default value
+      // }));
 
-      const sub_thai = thai_sub.map(item => ({
-        start: item.start.replace(',', '.') .substring(0, 12),
-        end: item.end.replace(',', '.').substring(0, 12),
-        message: item.message.trim() // Access 'message' directly for Thai subtitles
-      }));
+      // console.log('sub_eng',sub_eng)
 
+      // const sub_thai = thai_sub.map(item => ({
+      //   start: item.start.replace(',', '.') .substring(0, 12),
+      //   end: item.end.replace(',', '.').substring(0, 12),
+      //   message: item.message.trim() // Access 'message' directly for Thai subtitles
+      // }));
+
+      // console.log('sub_thai',sub_thai)
 
       return {
-        sub_eng: sub_eng,
-        sub_thai: sub_thai
+        sub_eng: eng_sub,
+        sub_thai: thai_sub
       };
-    } catch (error) {
-      throw new Error(`Error calling API: ${error.message}`);
-    }
+    // } catch (error) {
+    //   throw new Error(`Error calling API: ${error.message}`);
+    // }
   }
 
-  async readSrtFile(file_path: string){
-    const srtFormat = [];
-    
-    const fileContent = fs.readFileSync(file_path, { encoding: 'utf-8' });
-    const lines = fileContent.split('\n');
-    
-    let entry: any = {};
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-      
-      if (!isNaN(parseInt(trimmedLine))) {
-        if (Object.keys(entry).length !== 0) {
-          srtFormat.push(entry);
+
+  async readTextFile(file_path: string){
+      const textFormat = [];
+      const lines = fs.readFileSync(file_path, 'utf-8').split('\n');
+    lines.forEach(line => {
+      if (line.trim() !== '') {
+        const correctedLine = line.trim().replace(/'/g, '"'); // Replace single quotes with double quotes
+        try {
+          const obj = JSON.parse(correctedLine);
+          textFormat.push(obj);
+        } catch (error) {
+          console.error(`Error parsing JSON: ${error}`);
         }
-        entry = { id: parseInt(trimmedLine) };
-      } else if (trimmedLine.includes(' --> ')) {
-        const [start, end] = trimmedLine.split(' --> ');
-        entry.start = start;
-        entry.end = end;
-      } else if (trimmedLine !== '') {
-        entry.text = entry.text ? entry.text + ' ' + trimmedLine : trimmedLine;
       }
-    }
-
-    if (Object.keys(entry).length !== 0) {
-      srtFormat.push(entry);
-    }
-
-    return srtFormat;
+    });
+  
+      return textFormat;
   }
 
   // async getHistory(username: string): Promise<Video[]> {

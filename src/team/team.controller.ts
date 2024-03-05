@@ -14,6 +14,7 @@ import * as FormData from 'form-data';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { InviteDto } from '../notification/invite.dto';
+import { Team } from './team.entity';
 
 
 @Controller('team')
@@ -80,50 +81,62 @@ export class TeamController {
     if (user_id == null) {
       return '500 wrong with token'
     }
-    // save image
+
+    let filepath = file.path
+
+    // not have file
     if (!file || !file.path || !file.originalname) {
-      // Handle the case where file properties are missing
-      throw new Error('Invalid file data');
+      // // Handle the case where file properties are missing
+      // throw new Error('Invalid file data');
+      filepath = '/files/team_image/Team_defualt.png'
+    }
+    // have file
+    else{
+      // form data
+      const formData = new FormData();
+      const fileStream = fs.createReadStream(file.path);
+
+      formData.append('file', fileStream, { filename: file.originalname });
     }
 
-    // form data
-    const formData = new FormData();
-    const fileStream = fs.createReadStream(file.path);
 
-    formData.append('file', fileStream, { filename: file.originalname });
-
-    // // save user profile image at path
-    // const imagePath = await this.fileHandleService.saveFileFromFormData(file, './picture_team/')
-
-    // return this.teamService.edit_save(edit_team_info, imagePath)
-    const team_id = await this.teamService.create_team_basic(createTeamDto, file.path);
-    console.log('team_id', team_id)
-    // add owner to privilege
-    const createPrivilegeDto_owner = {
-      team_id: team_id,
-      user_id: user_id,
-      role: 'Owner',
-      post_id: 0
+    const teamWithSameName = await Team.findOne({ where: { team_name: createTeamDto.team_name } })
+    // if team same name
+    if (teamWithSameName) {
+      return '200 team name used'
     }
-    await this.privilegeService.add_privilege(createPrivilegeDto_owner);
-    console.log('save privilege owner')
-    // // add member to privilege
-    // console.log('createTeamDto.member',createTeamDto.member,createTeamDto.member.length)
-    // for (let i = 0; i < createTeamDto.member.length; i++) {
-    //   // find user_id by Email
-    //   console.log(createTeamDto.member[i].Email)
-    //   let user = await this.usersService.findByEmail(createTeamDto.member[i].Email);
-    //   let createPrivilegeDto_member = {
-    //     team_id: team_id,
-    //     user_id: user.id,
-    //     role: createTeamDto.member[i].Role,
-    //     post_id: 0
-    //   }
-    //   // add privilege
-    //   await this.privilegeService.add_privilege(createPrivilegeDto_member);
-    // }
 
-    return '200 OK';
+    else {
+      // return this.teamService.edit_save(edit_team_info, imagePath)
+      const team_id = await this.teamService.create_team_basic(createTeamDto, filepath);
+      console.log('team_id', team_id)
+      // add owner to privilege
+      const createPrivilegeDto_owner = {
+        team_id: team_id,
+        user_id: user_id,
+        role: 'Owner',
+        post_id: 0
+      }
+      await this.privilegeService.add_privilege(createPrivilegeDto_owner);
+      console.log('save privilege owner')
+      // // add member to privilege
+      // console.log('createTeamDto.member',createTeamDto.member,createTeamDto.member.length)
+      // for (let i = 0; i < createTeamDto.member.length; i++) {
+      //   // find user_id by Email
+      //   console.log(createTeamDto.member[i].Email)
+      //   let user = await this.usersService.findByEmail(createTeamDto.member[i].Email);
+      //   let createPrivilegeDto_member = {
+      //     team_id: team_id,
+      //     user_id: user.id,
+      //     role: createTeamDto.member[i].Role,
+      //     post_id: 0
+      //   }
+      //   // add privilege
+      //   await this.privilegeService.add_privilege(createPrivilegeDto_member);
+      // }
+
+      return '200 OK';
+    }
   }
 
 
@@ -165,7 +178,7 @@ export class TeamController {
   }
 
   @Post('test')
-  async test(@Body() info){
+  async test(@Body() info) {
     // get user_id from token
     const user_id = await this.authService.getUserByToken(info.access_token);
     console.log('test')
@@ -187,7 +200,7 @@ export class TeamController {
     return {
       'status': '200 OK',
       'team_name': team_info.team_name,
-      'team_image': team_info.picture_team.substring(team_info.picture_team.lastIndexOf('/')+1),
+      'team_image': team_info.picture_team.substring(team_info.picture_team.lastIndexOf('/') + 1),
       'team_desc': team_info.team_description,
       'user_role': user_privilege.role
     }
@@ -208,8 +221,8 @@ export class TeamController {
     }),
   }))
   async saveTeamInfo(@UploadedFile() file: Express.Multer.File, @Body() edit_team_info: EditTeamDto) {
-    console.log('edit_team_info',edit_team_info)
-    console.log('file',file)
+    console.log('edit_team_info', edit_team_info)
+    console.log('file', file)
     // get user_id from token
     const user_id = await this.authService.getUserByToken(edit_team_info.access_token);
     // find user Role by team_id & user_id
@@ -229,7 +242,7 @@ export class TeamController {
       const team = await this.teamService.TeamfindById(edit_team_info.team_id)
 
       // no change
-      if ((!file || !file.path || !file.originalname)&&(edit_team_info.team_name == team.team_name&&edit_team_info.team_description == team.team_description)) {
+      if ((!file || !file.path || !file.originalname) && (edit_team_info.team_name == team.team_name && edit_team_info.team_description == team.team_description)) {
         // Handle the case where file properties are missing
         // throw new Error('Invalid file data');
         return '200 OK'
@@ -246,18 +259,18 @@ export class TeamController {
       // const imagePath = await this.fileHandleService.saveFileFromFormData(file, './picture_team/') 
 
       // not have file sent to
-      if (!file){
+      if (!file) {
         return this.teamService.edit_save(edit_team_info, undefined)
       }
       // have file sent to
-      else{
+      else {
         // delete old image
         const status = await this.fileHandleService.deleteFile(team.picture_team)
 
         // return this.teamService.edit_save(edit_team_info, file.path.substring(file.path.lastIndexOf('/')+1))
         return this.teamService.edit_save(edit_team_info, file.path)
       }
-      
+
       // return this.teamService.edit_save(edit_team_info)
 
 
@@ -297,7 +310,7 @@ export class TeamController {
       const info_loop = await this.teamService.TeamfindById(teams[i].team_id);
 
       // get only team status 'Online
-      if(info_loop.team_status == 'Online'){
+      if (info_loop.team_status == 'Online') {
         // // base 64
         // const imageBase64 = await this.teamService.imageToBase64(info_loop.picture_team);
 
@@ -306,7 +319,7 @@ export class TeamController {
           // picture
           'team_name': info_loop.team_name,
           // 'image_content' : imageBase64
-          'image_path': info_loop.picture_team.substring(info_loop.picture_team.lastIndexOf('/')+1)
+          'image_path': info_loop.picture_team.substring(info_loop.picture_team.lastIndexOf('/') + 1)
         }
 
         teams_info.push(edit_info);
@@ -318,26 +331,29 @@ export class TeamController {
     const posts_info = [];
     // get each user info
     for (let i = 0; i < posts_privilege.length; i++) {
-      const info = await this.postService.findPostById(posts_privilege[i].post_id);
-
-      console.log(posts_privilege, info)
-
+      // const info = await this.postService.findPostById(posts_privilege[i].post_id);
+      // console.log(posts_privilege, info)
       // get file path from video_id 
       // const path = (await this.videoService.findFromId(info.video_id)).product_path;
-
       // const fileBase64 = await this.teamService.imageToBase64(path);
+
       const user = (await this.usersService.findById(posts_privilege[i].user_id))
-      const post = await this.postService.findPostById(posts_info[i].post_id)
-      const video = await this.videoService.findFromId(post.video_id)
+      // const post = await this.postService.findPostById(posts_privilege[i].post_id)
+      const info = await this.postService.findPostById(posts_privilege[i].post_id);
+
+      const video = await this.videoService.findFromId(info.video_id)
+      console.log(posts_privilege, info)
       console.log(user)
+
       const username = user.username
 
       const edit_info = {
         'user_id': posts_privilege[i].user_id,
         'Post_user': username,
+        'Post_user_image': user.profile_image.substring(user.profile_image.lastIndexOf('/') + 1),
         'Post_id': posts_privilege[i].post_id,
         'Post_Date': info.createAt,
-        'thumbnail' : video.thumbnail_path.substring(video.thumbnail_path.lastIndexOf('/')+1),
+        'thumbnail': video.thumbnail_path.substring(video.thumbnail_path.lastIndexOf('/') + 1),
         'Post_description': info.post_description
       }
 
@@ -352,10 +368,10 @@ export class TeamController {
       'team_id': team_info.team_id,
       'team_name': team_info.team_name,
       'team_description': team_info.team_description,
-      'team_picture': team_info.picture_team.substring(team_info.picture_team.lastIndexOf('/')+1),
+      'team_picture': team_info.picture_team.substring(team_info.picture_team.lastIndexOf('/') + 1),
       'team_count_member': count_member,
       'teams': teams_info,
-      'user_profile': user_info.profile_image.substring(user_info.profile_image.lastIndexOf('/')+1),
+      'user_image': user_info.profile_image.substring(user_info.profile_image.lastIndexOf('/') + 1),
       // แก้ post
       // 'posts' : posts_info
       'posts': posts_info
@@ -394,7 +410,7 @@ export class TeamController {
 
         const edit_info = {
           user_id: member_info.id,
-          profile_image : member_info.profile_image,
+          profile_image: member_info.profile_image.substring(member_info.profile_image.lastIndexOf('/')+1),
           member_name: member_info.username,
           Role: memberPrivilege[i].role
         }
@@ -413,8 +429,8 @@ export class TeamController {
     }
   }
 
-//   @Post('invite')
-//   invite_member(@Body() inviteDto:InviteDto){
-//     return this.teamService.invite(inviteDto);
-//   }
+  //   @Post('invite')
+  //   invite_member(@Body() inviteDto:InviteDto){
+  //     return this.teamService.invite(inviteDto);
+  //   }
 }

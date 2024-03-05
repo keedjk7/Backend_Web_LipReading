@@ -33,8 +33,10 @@ export class TeamPostPageService {
         // const base64Video = await this.videoService.download_origin(video_id,user_id)
         // subtitle eng,thai
         const videoFrameData = await this.videoService.getVideoFrame(video_id);
-        const subtitle_eng = videoFrameData.sub_eng;
+        const subtitle_eng = await videoFrameData.sub_eng;
         const subtitle_thai = videoFrameData.sub_thai;
+
+        console.log(videoFrameData,subtitle_eng)
         // // subtitle thai
         // const subtitle_th = await this.videoService.translate_thai(subtitle_eng)
 
