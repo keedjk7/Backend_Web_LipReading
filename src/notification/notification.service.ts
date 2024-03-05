@@ -181,7 +181,7 @@ export class NotificationService {
             const sender = await this.usersService.findById(allNotificationReceiver[i].sender_id)
 
             const edit = {
-                team_image: team.picture_team,
+                team_image: team.picture_team.substring(team.picture_team.lastIndexOf('/')+1),
                 team_name : team.team_name,
                 notification_id: allNotificationReceiver[i].notification_id,
                 sender_name : sender.username

@@ -104,13 +104,15 @@ export class VideoController {
       headers: formData.getHeaders(),
       maxRedirects: 0,
     });
-    console.log(response.status);
-    console.log(response.headers);
-    // console.log(response.data);
+    // console.log(response.status);
+    // console.log(response.headers);
+    console.log(response.data);
 
     // return '200 OK';
 
-    const video_obj = response.data
+    const video_obj = await response.data
+
+    console.log('obj',video_obj)
 
     // update after finish process
     if (createVideoDto.access_token === undefined) {
@@ -144,15 +146,15 @@ export class VideoController {
   //   // have token (user_account)
   // }
 
-  @Post('download_video')
-  async download_video(@Body() downloadVideoDto: DownloadVideoDto) {
-    console.log("check", downloadVideoDto)
-    console.log('donwload case user')
-    const user_id = await this.authService.getUserByToken(downloadVideoDto.access_token);
-    return this.videoService.download_video(downloadVideoDto.video_id, user_id)
+  // @Post('download_video')
+  // async download_video(@Body() downloadVideoDto: DownloadVideoDto) {
+  //   console.log("check", downloadVideoDto)
+  //   console.log('donwload case user')
+  //   const user_id = await this.authService.getUserByToken(downloadVideoDto.access_token);
+  //   return this.videoService.download_video(downloadVideoDto.video_id, user_id)
 
-    // have token (user_account)
-  }
+  //   // have token (user_account)
+  // }
 
 
   @Post('new_download_subtitle')

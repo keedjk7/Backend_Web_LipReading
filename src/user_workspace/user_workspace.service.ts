@@ -64,7 +64,8 @@ export class UserWorkspaceService {
             const modifiedVideoInfo = {
                 'video_id': videoes[i].video_id,
                 'video_name': videoes[i].video_name,
-                'video_date': videoes[i].createAt
+                'video_date': videoes[i].createAt,
+                'thumbnail' : videoes[i].thumbnail_path.substring(videoes[i].thumbnail_path.lastIndexOf('/') + 1),
             };
 
             videoes_info.push(modifiedVideoInfo);
